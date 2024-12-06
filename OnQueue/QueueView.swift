@@ -8,19 +8,20 @@
 import SwiftUI
 
 struct QueueView: View {
+    let category: String
+    
     @State private var searchText = ""
     @State private var newItem = ""
     @State private var isNewItemSheetPresented: Bool = false
     @State private var dragOffset: CGSize = .zero
-    
-    let category: String
     
     let items = [
         "Good Will Hunting",
         "Inglorious Bastards",
         "Inception",
         "Fight Club",
-        "Ace Ventura"
+        "Ace Ventura",
+        "Dead Poets Society"
     ]
 
     var body: some View {
@@ -28,13 +29,67 @@ struct QueueView: View {
             // Swipeable card for the first item
             if let firstItem = items.first {
                 ZStack {
-                    Color.blue.opacity(0.1) // Background color
+                    Color.white // Background color
                         .cornerRadius(16)
+                        .shadow(color: Color(.systemGray4), radius: 5)
+                    
                     Text(firstItem)
                         .font(.title)
                         .fontWeight(.bold)
                         .padding()
-                        .multilineTextAlignment(.center)
+                    
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button {
+                                // Ellipsis action
+                                print("Ellipsis tapped")
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .foregroundStyle(.blue)
+                                    .padding()
+                            }
+                        }
+                        Spacer()
+                        HStack {
+                            Button {
+                                // Skip action
+                                withAnimation {
+                                    dragOffset = CGSize(width: -500, height: 0)
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    dragOffset = .zero
+                                    // Logic to handle skip
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.left")
+                                    Text("Skip")
+                                }
+                                .foregroundStyle(.yellow)
+                            }
+                            
+                            Spacer()
+                            
+                            Button {
+                                // Done action
+                                withAnimation {
+                                    dragOffset = CGSize(width: 500, height: 0)
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    dragOffset = .zero
+                                    // Logic to handle done
+                                }
+                            } label: {
+                                HStack {
+                                    Text("Done")
+                                    Image(systemName: "arrow.right")
+                                }
+                                .foregroundStyle(.green)
+                            }
+                        }
+                        .padding()
+                    }
                 }
                 .frame(width: 300, height: 300) // Square size
                 .offset(x: dragOffset.width, y: dragOffset.height)
@@ -42,7 +97,10 @@ struct QueueView: View {
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
-                            dragOffset = gesture.translation
+                            dragOffset = CGSize(
+                                width: gesture.translation.width,
+                                height: max(min(gesture.translation.height, 50), -50)
+                            )
                         }
                         .onEnded { _ in
                             if abs(dragOffset.width) > 150 {
@@ -62,22 +120,32 @@ struct QueueView: View {
                             }
                         }
                 )
-                .padding(.top)
+                .zIndex(1) // Ensure this view is above others
             }
             
             // Scroll view for the remaining items
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(items.dropFirst(), id: \.self) { item in
-                        Text(item)
-                            .padding(.vertical, 8)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
-                            .padding(.horizontal)
+                        HStack {
+                            Text(item)
+                            Spacer()
+                            Button {
+                                isNewItemSheetPresented = true
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.white)
+                        .cornerRadius(8)
+                        .padding(.horizontal)
                     }
                 }
             }
+            .zIndex(0) // Ensure this view is behind the swipeable card
         }
         .padding([.horizontal])
         .navigationTitle(category)
@@ -88,6 +156,12 @@ struct QueueView: View {
                     .foregroundStyle(.blue)
             }
             ToolbarItemGroup(placement: .bottomBar) {
+                Button {
+                    
+                }label: {
+                    Image(systemName: "arrow.uturn.backward")
+                        .foregroundStyle(.blue)
+                }
                 Spacer()
                 Button {
                     isNewItemSheetPresented = true
@@ -98,9 +172,14 @@ struct QueueView: View {
             }
             
         }
+        .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $isNewItemSheetPresented) {
             NewItemSheetView()
                 .presentationDetents([.large])
         }
     }
+}
+
+#Preview {
+    QueueView(category: "Movies")
 }

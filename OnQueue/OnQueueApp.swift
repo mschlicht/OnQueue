@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct OnQueueApp: App {
@@ -13,5 +14,10 @@ struct OnQueueApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Queue.self)
+    }
+    
+    init() {
+        print(URL.applicationSupportDirectory.path(percentEncoded: false))
     }
 }

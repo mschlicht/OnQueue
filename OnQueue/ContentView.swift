@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var context
+    @Query(sort: \Queue.createdOn) private var queues: [Queue]
     @State private var searchText: String = ""
     @State private var isNewQueueSheetPresented: Bool = false
+    @State private var isEditing: Bool = false
 
     let categories = [
         ("Movies", "10"),
@@ -36,83 +40,95 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-                ScrollView {
-                    LazyVGrid(columns: gridColumns, spacing: 20) {
-                        ForEach(categories.indices, id: \ .self) { index in
-                            NavigationLink(destination: QueueView(category: categories[index].0)) {
-                                VStack {
-                                    ZStack {
-                                        Circle()
-                                            .fill(colors[index % colors.count])
-                                            .frame(width: 60, height: 60)
-
-                                        Image(systemName: icons[index])
-                                            .foregroundStyle(.white)
-                                            .font(.title2)
+            ScrollView {
+                Group {
+                    if queues.isEmpty {
+                        ContentUnavailableView("Create your first queue.", systemImage: "square.stack.3d.up.fill")
+                            .padding()
+                    } else {
+                        LazyVGrid(columns: gridColumns, spacing: 20) {
+                            ForEach(queues) { queue in
+                                NavigationLink(destination: QueueView(category: queue.title)) {
+                                    VStack {
+                                        ZStack {
+                                            Circle()
+                                                .fill(colorFromDescription(queue.color))
+                                                .frame(width: 60, height: 60)
+                                            
+                                            Image(systemName: queue.icon)
+                                                .foregroundStyle(.white)
+                                                .font(.title2)
+                                        }
+                                        
+                                        Text(queue.title)
+                                            .foregroundStyle(.black)
+                                        Text("5")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.gray)
                                     }
-                                    
-                                    Text(categories[index].0)
-                                        .foregroundStyle(.black)
-                                    Text(categories[index].1)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.gray)
                                 }
                             }
                         }
+                        .padding([.vertical])
                     }
-                    .padding([.vertical])
+                }
+                VStack() {
+                    Text("Shared Groups")
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     VStack() {
-                        Text("Shared Groups")
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        VStack() {
-                            Button(action: {}) {
-                                HStack {
-                                    Image(systemName: "plus")
-                                        .padding([.horizontal],6)
-                                    Text("New Group")
-                                }
-                                .padding([.vertical, .horizontal], 10)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(.white)
-                                .cornerRadius(8)
+                        Button(action: {}) {
+                            HStack {
+                                Image(systemName: "plus")
+                                    .padding([.horizontal],6)
+                                Text("New Group")
                             }
+                            .padding([.vertical, .horizontal], 10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.white)
+                            .cornerRadius(8)
                         }
                     }
                 }
-                .padding([.horizontal])
-                .navigationTitle("Queues")
-                .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text("Edit")
-                            .foregroundStyle(.blue)
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
+            }
+            .padding([.horizontal])
+            .navigationTitle("Queues")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        
+                    }label: {
                         Image(systemName: "gear")
                             .foregroundStyle(.blue)
                     }
-                    ToolbarItemGroup(placement: .bottomBar) {
+                }
+                ToolbarItemGroup(placement: .bottomBar) {
+                    Button {
+                        
+                    }label: {
                         Image(systemName: "person.2.badge.plus.fill")
                             .foregroundStyle(.blue)
-                        Spacer()
-                        Button {
-                            isNewQueueSheetPresented = true
-                        }label: {
-                            Image(systemName: "plus.square.fill.on.square.fill")
-                                .foregroundStyle(.blue)
-                        }
+                    }
+                    Spacer()
+                    Button {
+                        isNewQueueSheetPresented = true
+                    }label: {
+                        Image(systemName: "plus.square.fill.on.square.fill")
+                            .foregroundStyle(.blue)
                     }
                 }
-                .background(Color(.systemGroupedBackground))
-                .sheet(isPresented: $isNewQueueSheetPresented) {
-                    NewQueueSheetView()
-                        .presentationDetents([.large])
-                }
             }
+            .background(Color(.systemGroupedBackground))
+            .sheet(isPresented: $isNewQueueSheetPresented) {
+                NewQueueSheetView()
+                    .presentationDetents([.large])
+            }
+        }
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: Queue.self, inMemory: true)
 }

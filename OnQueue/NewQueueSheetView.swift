@@ -8,16 +8,32 @@
 import SwiftUI
 
 struct NewQueueSheetView: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     @State private var title: String = ""
     @State private var selectedColor: String = "Blue"
-    @State private var selectedIcon: String = "Circle"
+    @State private var selectedIcon: String = "square.stack.3d.up.fill"
     @State private var selectedGroup: String = "Personal"
     @FocusState private var isTitleFieldFocused: Bool
-    @Environment(\.dismiss) private var dismiss
 
-    let colors = ["Red", "Blue", "Green", "Yellow"]
-    let icons = ["Circle", "Star", "Square", "Heart", "Triangle"]
+    let colors: [String] = ["Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Blue", "Indigo", "Purple", "Pink", "Brown"]
     let groups = ["Personal", "Family", "Roomates"]
+    let icons: [(name: String, systemImage: String)] = [
+        ("Default", "square.stack.3d.up.fill"),
+        ("Popcorn", "popcorn.fill"),
+        ("Movie Clapper", "movieclapper.fill"),
+        ("Game Controller", "gamecontroller.fill"),
+        ("TV", "tv.fill"),
+        ("Map", "map.fill"),
+        ("Location", "location.fill"),
+        ("Clipboard", "list.clipboard.fill"),
+        ("Books", "books.vertical.fill"),
+        ("Walk", "figure.walk"),
+        ("Run", "figure.run"),
+        ("Social Activity", "figure.socialdance"),
+        ("Food", "fork.knife")
+    ]
+
 
     var body: some View {
         NavigationStack() {
@@ -25,14 +41,16 @@ struct NewQueueSheetView: View {
                 TextField("Queue Title", text: $title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Picker("Color", selection:$selectedColor) {
+                Picker("Color", selection: $selectedColor) {
                     ForEach(colors, id: \ .self) { color in
                         Text(color).tag(color)
                     }
                 }
+                .foregroundStyle(colorFromDescription(selectedColor))
                 Picker("Icon", selection: $selectedIcon) {
-                    ForEach(icons, id: \ .self) { icon in
-                        Text(icon).tag(icon)
+                    ForEach(icons, id: \.systemImage) { icon in
+                        Label(icon.name, systemImage: icon.systemImage)
+                            .tag(icon.systemImage)
                     }
                 }
                 Picker("Group", selection: $selectedGroup) {
@@ -41,6 +59,8 @@ struct NewQueueSheetView: View {
                     }
                 }
                 Button("Create Queue") {
+                    let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)
+                    context.insert(newQueue)
                     dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
