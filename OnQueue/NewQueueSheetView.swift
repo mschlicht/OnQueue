@@ -9,93 +9,89 @@ import SwiftUI
 
 struct NewQueueSheetView: View {
     @State private var name: String = ""
-    @FocusState private var nameFieldIsFocused: Bool
-
+    @State private var selectedColor: String = "Blue"
+    @State private var selectedIcon: String = "Circle"
     @State private var selectedGroup: String = "Personal"
-    @State private var selectedIcon: String = "film.fill"
-    @State private var selectedColor: Color = .blue
+    @Environment(\.dismiss) private var dismiss
 
-    let groups = ["Personal", "Work", "Shared"]
-    let icons = ["film.fill", "fork.knife", "tv.fill", "gamecontroller.fill"]
-    let colors: [Color] = [.blue, .green, .yellow, .teal, .red, .orange]
+    let colors = ["Red", "Blue", "Green", "Yellow"]
+    let icons = ["Circle", "Star", "Square", "Heart", "Triangle"]
+    let groups = ["Personal", "Family", "Roomates"]
 
     var body: some View {
         ZStack {
-            // Background tap to dismiss keyboard
+            
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    nameFieldIsFocused = false // Dismiss keyboard
-                }
 
-            VStack(spacing: 20) {
+            VStack(spacing:10) {
                 Text("New Queue")
-                    .font(.title)
+                    .font(.title2)
                     .bold()
-                    .padding(.top)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom)
 
                 // Name Input Field
-                TextField("Enter queue name", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .focused($nameFieldIsFocused)
-                    .onAppear {
-                        nameFieldIsFocused = true
+                TextField("Enter queue title", text: $name)
+                    .padding(.horizontal)
+                    .frame(height: 42)
+                    .background(.white)
+                    .cornerRadius(8)
+                
+                // Color Picker
+                List {
+                    Picker("Color", selection: $selectedColor) {
+                        ForEach(colors, id: \ .self) { color in
+                            Text(color).tag(color)
+                        }
                     }
-
-                // Group Selection
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Group")
-                        .font(.headline)
+                }
+                .scrollDisabled(true)
+                .frame(maxHeight: 100)
+                .padding(EdgeInsets(top: -30, leading: -20, bottom: -20, trailing: -20))
+                .clipShape(Rectangle())
+                
+                // Icon Picker
+                List {
+                    Picker("Icon", selection: $selectedIcon) {
+                        ForEach(icons, id: \ .self) { icon in
+                            Text(icon).tag(icon)
+                        }
+                    }
+                }
+                .scrollDisabled(true)
+                .frame(maxHeight: 100)
+                .padding(EdgeInsets(top: -30, leading: -20, bottom: -20, trailing: -20))
+                .clipShape(Rectangle())
+                
+                // Color Picker
+                List {
                     Picker("Group", selection: $selectedGroup) {
-                        ForEach(groups, id: \.self) { group in
+                        ForEach(groups, id: \ .self) { group in
                             Text(group).tag(group)
                         }
                     }
-                    .pickerStyle(MenuPickerStyle())
                 }
-
-                // Icon Selection
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Icon")
-                        .font(.headline)
-                    Picker("Icon", selection: $selectedIcon) {
-                        ForEach(icons, id: \.self) { icon in
-                            HStack {
-                                Image(systemName: icon)
-                                Text(icon)
-                            }
-                            .tag(icon)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
+                .scrollDisabled(true)
+                .frame(maxHeight: 100)
+                .padding(EdgeInsets(top: -30, leading: -20, bottom: -20, trailing: -20))
+                .clipShape(Rectangle())
+                
+                Button(action: {
+                    dismiss()
+                }) {
+                    Label("Create Queue", systemImage: "plus")
                 }
-
-                // Color Selection
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Color")
-                        .font(.headline)
-                    Picker("Color", selection: $selectedColor) {
-                        ForEach(colors, id: \.self) { color in
-                            HStack {
-                                Circle()
-                                    .fill(color)
-                                    .frame(width: 20, height: 20)
-                                Text(color.description.capitalized)
-                            }
-                            .tag(color)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                }
-
-                Spacer()
+                .padding(.top)
+                
             }
             .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
-            .presentationDetents([.large])
+            .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
     }
+}
+
+#Preview {
+    NewQueueSheetView()
 }
