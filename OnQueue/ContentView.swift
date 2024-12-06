@@ -96,16 +96,18 @@ struct ContentView: View {
                         Image(systemName: "person.2.badge.plus.fill")
                             .foregroundStyle(.blue)
                         Spacer()
-                        Image(systemName: "plus.square.fill.on.square.fill")
-                            .foregroundStyle(.blue)
-                            .onTapGesture {
-                                isNewQueueSheetPresented = true
-                            }
+                        Button {
+                            isNewQueueSheetPresented = true
+                        }label: {
+                            Image(systemName: "plus.square.fill.on.square.fill")
+                                .foregroundStyle(.blue)
+                        }
                     }
                 }
                 .background(Color(.systemGroupedBackground))
                 .sheet(isPresented: $isNewQueueSheetPresented) {
                     NewQueueSheetView()
+                        .presentationDetents([.large])
                 }
             }
     }
