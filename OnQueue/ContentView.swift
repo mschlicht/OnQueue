@@ -9,29 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var context
     @Query(sort: \Queue.createdOn) private var queues: [Queue]
     @State private var searchText: String = ""
     @State private var isNewQueueSheetPresented: Bool = false
-    @State private var isEditing: Bool = false
-
-    let categories = [
-        ("Movies", "10"),
-        ("Restaurants", "12"),
-        ("Shows", "5"),
-        ("Boardgames", "8")
-    ]
-
-    let colors: [Color] = [
-        .blue, .green, .yellow, .teal, .red, .orange
-    ]
-
-    let icons = [
-        "film.fill",
-        "fork.knife",
-        "tv.fill",
-        "gamecontroller.fill"
-    ]
 
     let gridColumns = [
         GridItem(.flexible()),
@@ -48,7 +28,7 @@ struct ContentView: View {
                     } else {
                         LazyVGrid(columns: gridColumns, spacing: 20) {
                             ForEach(queues) { queue in
-                                NavigationLink(destination: QueueView(category: queue.title)) {
+                                NavigationLink(destination: QueueView(queue: queue)) {
                                     VStack {
                                         ZStack {
                                             Circle()
@@ -62,7 +42,7 @@ struct ContentView: View {
                                         
                                         Text(queue.title)
                                             .foregroundStyle(.black)
-                                        Text("5")
+                                        Text("\(queue.count)")
                                             .font(.subheadline)
                                             .foregroundStyle(.gray)
                                     }

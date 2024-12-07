@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct NewItemSheetView: View {
+    let queue: Queue
+    @Environment(\.dismiss) private var dismiss
     @State private var title: String = ""
     @FocusState private var isTitleFieldFocused: Bool
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack() {
@@ -18,7 +19,14 @@ struct NewItemSheetView: View {
                 TextField("Item Title", text: $title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Button("Create Queue") {
+                Button("Create Item") {
+                    let newQueueItem = QueueItem(title: title)
+                    if queue.items != nil {
+                        queue.items?.append(newQueueItem)
+                    } else {
+                        queue.items = [newQueueItem]
+                    }
+                    queue.count += 1
                     dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -39,6 +47,6 @@ struct NewItemSheetView: View {
     }
 }
 
-#Preview {
-    NewItemSheetView()
-}
+//#Preview {
+//    NewItemSheetView()
+//}
