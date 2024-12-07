@@ -68,7 +68,7 @@ struct QueueItemsView: View {
                             .font(.system(size: 48))
                             .foregroundStyle(colorFromDescription(queue.color))
                         Text("Create an item.")
-                            .font(.title)
+                            .font(.title2)
                             .fontWeight(.semibold)
                     }
                 }

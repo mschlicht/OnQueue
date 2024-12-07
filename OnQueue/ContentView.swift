@@ -59,8 +59,17 @@ struct QueuesAndGroups: View {
     var body: some View {
         ScrollView {
             if queues.isEmpty {
-                ContentUnavailableView("Create your first queue.", systemImage: "square.stack.3d.up.fill")
-                    .padding()
+                ContentUnavailableView {
+                    VStack {
+                        Image("queue")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 48, height: 50)
+                        Text("Create a queue.")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                    }
+                }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible())], spacing: 20) {
                     ForEach(queues) { queue in
