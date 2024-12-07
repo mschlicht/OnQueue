@@ -10,9 +10,22 @@
 		4914E4142D021C89009E86AF /* OnQueue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OnQueue.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		49A170FE2D04F5C90082A9AF /* Exceptions for "OnQueue" folder in "OnQueue" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Preview Content/Preview Assets.xcassets",
+			);
+			target = 4914E4132D021C89009E86AF /* OnQueue */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4914E4162D021C89009E86AF /* OnQueue */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				49A170FE2D04F5C90082A9AF /* Exceptions for "OnQueue" folder in "OnQueue" target */,
+			);
 			path = OnQueue;
 			sourceTree = "<group>";
 		};
@@ -54,6 +67,7 @@
 			buildPhases = (
 				4914E4102D021C89009E86AF /* Sources */,
 				4914E4112D021C89009E86AF /* Frameworks */,
+				49A170FD2D04F5C90082A9AF /* Resources */,
 			);
 			buildRules = (
 			);
@@ -102,6 +116,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		49A170FD2D04F5C90082A9AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4914E4102D021C89009E86AF /* Sources */ = {

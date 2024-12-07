@@ -20,6 +20,5 @@ class QueueItem {
         self.title = title
         self.createdOn = createdOn
     }
-    @Relationship
     var queue: Queue?
 }

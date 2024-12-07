@@ -10,21 +10,94 @@ import SwiftData
 
 struct QueueView: View {
     let queue: Queue
+    @State private var searchText = ""
+    @State private var isNewItemSheetPresented: Bool = false
+
+    var body: some View {
+        QueueItemsView(queue:queue)
+        .padding([.horizontal])
+        .navigationTitle(queue.title)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    
+                } label: {
+                    Image(systemName: "gear")
+                        .foregroundStyle(.blue)
+                }
+            }
+            ToolbarItemGroup(placement: .bottomBar) {
+                Button {
+                    
+                } label: {
+                    Image(systemName: "arrow.uturn.backward")
+                        .foregroundStyle(.blue)
+                }
+                Spacer()
+                Button {
+                    isNewItemSheetPresented = true
+                } label: {
+                    Image(systemName: "plus.square.fill")
+                        .foregroundStyle(.blue)
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $isNewItemSheetPresented) {
+            NewItemSheetView(queue: queue)
+                .presentationDetents([.large])
+        }
+    }
+}
+
+struct QueueItemsView: View {
+    let queue: Queue
+    @Environment(\.isSearching) private var isSearching
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
-    @State private var newItem = ""
-    @State private var isNewItemSheetPresented: Bool = false
     @State private var dragOffset: CGSize = .zero
 
     var body: some View {
         VStack(spacing: 16) {
             let items = queue.items?.sorted(using: KeyPathComparator(\QueueItem.createdOn)) ?? []
-            // Swipeable card for the first item
-            Group {
-                if items.isEmpty {
-                    ContentUnavailableView("Create your first item.", systemImage: "square.stack.3d.up.fill")
-                        .padding()
+            if items.isEmpty {
+                ContentUnavailableView {
+                    VStack {
+                        Image(systemName: queue.icon)
+                            .font(.system(size: 48))
+                            .foregroundStyle(colorFromDescription(queue.color))
+                        Text("Create an item.")
+                            .font(.title)
+                            .fontWeight(.semibold)
+                    }
+                }
+            } else {
+                if isSearching {
+                    // Scroll view for all the items
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(items) { item in
+                                HStack {
+                                    Text(item.title)
+                                    Spacer()
+                                    Button {
+                                        
+                                    } label: {
+                                        Image(systemName: "ellipsis")
+                                            .foregroundStyle(.blue)
+                                    }
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(.white)
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                    .padding(.vertical)
                 } else {
+                    // Swipeable card for the first item
                     if let firstItem = items.first {
                         ZStack {
                             Color.white // Background color
@@ -102,7 +175,6 @@ struct QueueView: View {
                         )
                         .zIndex(1) // Ensure this view is above others
                     }
-                    
                     // Scroll view for the remaining items
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
@@ -111,7 +183,7 @@ struct QueueView: View {
                                     Text(item.title)
                                     Spacer()
                                     Button {
-                                        isNewItemSheetPresented = true
+                                        
                                     } label: {
                                         Image(systemName: "ellipsis")
                                             .foregroundStyle(.blue)
@@ -128,41 +200,7 @@ struct QueueView: View {
                 }
             }
         }
-        .padding([.horizontal])
-        .navigationTitle(queue.title)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "gear")
-                        .foregroundStyle(.blue)
-                }
-            }
-            ToolbarItemGroup(placement: .bottomBar) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "arrow.uturn.backward")
-                        .foregroundStyle(.blue)
-                }
-                Spacer()
-                Button {
-                    isNewItemSheetPresented = true
-                } label: {
-                    Image(systemName: "plus.square.fill")
-                        .foregroundStyle(.blue)
-                }
-            }
-        }
-        .background(Color(.systemGroupedBackground))
-        .sheet(isPresented: $isNewItemSheetPresented) {
-            NewItemSheetView(queue: queue)
-                .presentationDetents([.large])
-        }
     }
-    
     private enum SwipeAction {
         case skip, done
     }

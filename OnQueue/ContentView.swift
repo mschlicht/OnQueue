@@ -9,68 +9,12 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Query(sort: \Queue.createdOn) private var queues: [Queue]
     @State private var searchText: String = ""
     @State private var isNewQueueSheetPresented: Bool = false
-
-    let gridColumns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                Group {
-                    if queues.isEmpty {
-                        ContentUnavailableView("Create your first queue.", systemImage: "square.stack.3d.up.fill")
-                            .padding()
-                    } else {
-                        LazyVGrid(columns: gridColumns, spacing: 20) {
-                            ForEach(queues) { queue in
-                                NavigationLink(destination: QueueView(queue: queue)) {
-                                    VStack {
-                                        ZStack {
-                                            Circle()
-                                                .fill(colorFromDescription(queue.color))
-                                                .frame(width: 60, height: 60)
-                                            
-                                            Image(systemName: queue.icon)
-                                                .foregroundStyle(.white)
-                                                .font(.title2)
-                                        }
-                                        
-                                        Text(queue.title)
-                                            .foregroundStyle(.black)
-                                        Text("\(queue.count)")
-                                            .font(.subheadline)
-                                            .foregroundStyle(.gray)
-                                    }
-                                }
-                            }
-                        }
-                        .padding([.vertical])
-                    }
-                }
-                VStack() {
-                    Text("Shared Groups")
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack() {
-                        Button(action: {}) {
-                            HStack {
-                                Image(systemName: "plus")
-                                    .padding([.horizontal],6)
-                                Text("New Group")
-                            }
-                            .padding([.vertical, .horizontal], 10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.white)
-                            .cornerRadius(8)
-                        }
-                    }
-                }
-            }
+            QueuesAndGroups()
             .padding([.horizontal])
             .navigationTitle("Queues")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
@@ -103,6 +47,65 @@ struct ContentView: View {
             .sheet(isPresented: $isNewQueueSheetPresented) {
                 NewQueueSheetView()
                     .presentationDetents([.large])
+            }
+        }
+    }
+}
+
+struct QueuesAndGroups: View {
+    @Query(sort: \Queue.createdOn) private var queues: [Queue]
+    @Environment(\.isSearching) private var isSearching
+    
+    var body: some View {
+        ScrollView {
+            if queues.isEmpty {
+                ContentUnavailableView("Create your first queue.", systemImage: "square.stack.3d.up.fill")
+                    .padding()
+            } else {
+                LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible())], spacing: 20) {
+                    ForEach(queues) { queue in
+                        NavigationLink(destination: QueueView(queue: queue)) {
+                            VStack {
+                                ZStack {
+                                    Circle()
+                                        .fill(colorFromDescription(queue.color))
+                                        .frame(width: 60, height: 60)
+                                    
+                                    Image(systemName: queue.icon)
+                                        .foregroundStyle(.white)
+                                        .font(.title2)
+                                }
+                                
+                                Text(queue.title)
+                                    .foregroundStyle(.black)
+                                Text("\(queue.count)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+                    }
+                }
+                .padding([.vertical])
+            }
+            if !isSearching {
+                VStack() {
+                    Text("Shared Groups")
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack() {
+                        Button(action: {}) {
+                            HStack {
+                                Image(systemName: "plus")
+                                    .padding([.horizontal],6)
+                                Text("New Group")
+                            }
+                            .padding([.vertical, .horizontal], 10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.white)
+                            .cornerRadius(8)
+                        }
+                    }
+                }
             }
         }
     }
