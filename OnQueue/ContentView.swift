@@ -69,6 +69,7 @@ struct QueuesAndGroups: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                     }
+                    .padding(.vertical, 48)
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible())], spacing: 20) {

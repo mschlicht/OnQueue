@@ -57,6 +57,8 @@ struct QueueItemsView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
     @State private var dragOffset: CGSize = .zero
+    @State private var isRemovingFirstItem = false
+    @State private var items: [QueueItem] = []
 
     var body: some View {
         VStack(spacing: 16) {
@@ -112,9 +114,25 @@ struct QueueItemsView: View {
                             VStack {
                                 HStack {
                                     Spacer()
-                                    Button {
-                                        // Ellipsis action
-                                        print("Ellipsis tapped")
+                                    Menu {
+                                        Button {
+                                            
+                                        } label: {
+                                            Text("Details")
+                                            Image(systemName: "text.page.badge.magnifyingglass")
+                                        }
+                                        Button {
+                                            // do something
+                                        } label: {
+                                            Text("Update")
+                                            Image(systemName: "arrow.trianglehead.2.clockwise")
+                                        }
+                                        Button {
+                                            deleteFirstItem(firstItem: firstItem)
+                                        } label: {
+                                            Text("Delete")
+                                            Image(systemName: "minus.circle")
+                                        }
                                     } label: {
                                         Image(systemName: "ellipsis")
                                             .foregroundStyle(.blue)
@@ -153,6 +171,8 @@ struct QueueItemsView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity) // Square size
                         .offset(x: dragOffset.width, y: dragOffset.height)
                         .rotationEffect(.degrees(Double(dragOffset.width / 10))) // Rotate slightly
+                        .opacity(isRemovingFirstItem ? 0 : 1) // Fade out animation
+                        .scaleEffect(isRemovingFirstItem ? 0.75 : 1) // Slight shrink animation
                         .gesture(
                             DragGesture()
                                 .onChanged { gesture in
@@ -175,7 +195,7 @@ struct QueueItemsView: View {
                         )
                         .zIndex(1) // Ensure this view is above others
                     }
-                    // Scroll view for the remaining items
+                    // for each for the remaining items
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(items.dropFirst()) { item in
@@ -201,10 +221,20 @@ struct QueueItemsView: View {
             }
         }
     }
+    private func deleteFirstItem(firstItem: QueueItem) {
+        withAnimation(.easeOut(duration: 0.5)) {
+            isRemovingFirstItem = true // Trigger animation
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // Delay removal until animation completes
+            context.delete(firstItem)
+            queue.count -= 1
+            isRemovingFirstItem = false // Reset state for subsequent actions
+        }
+    }
     private enum SwipeAction {
         case skip, done
     }
-    
     private func performSwipeAction(_ action: SwipeAction, firstItem: QueueItem) {
         withAnimation(.easeOut(duration: 1)) {
             dragOffset = CGSize(width: action == .done ? 1000 : -1000, height: 0)
