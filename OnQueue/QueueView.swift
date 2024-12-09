@@ -28,12 +28,12 @@ struct QueueView: View {
                 }
             }
             ToolbarItemGroup(placement: .bottomBar) {
-//                Button {
-//                    
-//                } label: {
-//                    Image(systemName: "arrow.uturn.backward")
-//                        .foregroundStyle(.blue)
-//                }
+                Button {
+                    
+                } label: {
+                    Image(systemName: "chart.bar.fill")
+                        .foregroundStyle(.blue)
+                }
                 Spacer()
                 Button {
                     isNewItemSheetPresented = true
