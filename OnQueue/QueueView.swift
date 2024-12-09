@@ -28,12 +28,12 @@ struct QueueView: View {
                 }
             }
             ToolbarItemGroup(placement: .bottomBar) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "arrow.uturn.backward")
-                        .foregroundStyle(.blue)
-                }
+//                Button {
+//                    
+//                } label: {
+//                    Image(systemName: "arrow.uturn.backward")
+//                        .foregroundStyle(.blue)
+//                }
                 Spacer()
                 Button {
                     isNewItemSheetPresented = true
@@ -57,12 +57,12 @@ struct QueueItemsView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
     @State private var dragOffset: CGSize = .zero
-    @State private var isRemovingFirstItem = false
-    @State private var items: [QueueItem] = []
+    @State private var isRemovingFirstItem: Bool = false
+    @State private var isDeletingListItem: Bool = false
 
     var body: some View {
+        let items = queue.items?.sorted(using: KeyPathComparator(\QueueItem.createdOn)) ?? []
         VStack(spacing: 16) {
-            let items = queue.items?.sorted(using: KeyPathComparator(\QueueItem.createdOn)) ?? []
             if items.isEmpty {
                 ContentUnavailableView {
                     VStack {
@@ -76,28 +76,89 @@ struct QueueItemsView: View {
                 }
             } else {
                 if isSearching {
-                    // Scroll view for all the items
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(items) { item in
+                    List {
+                        ForEach(items) { item in
+                            Section {
                                 HStack {
                                     Text(item.title)
                                     Spacer()
-                                    Button {
-                                        
+                                    Menu {
+                                        Button {
+                                            
+                                        } label: {
+                                            Text("Details")
+                                            Image(systemName: "text.page.badge.magnifyingglass")
+                                        }
+                                        Button {
+                                            
+                                        } label: {
+                                            Text("Update")
+                                            Image(systemName: "arrow.trianglehead.2.clockwise")
+                                        }
+                                        Button {
+                                            withAnimation(.spring) {
+                                                isDeletingListItem = true
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                                context.delete(item)
+                                                queue.count -= 1
+                                                try? context.save()
+                                                isDeletingListItem = false
+                                            }
+                                        } label: {
+                                            Text("Delete")
+                                            Image(systemName: "trash")
+                                        }
                                     } label: {
                                         Image(systemName: "ellipsis")
                                             .foregroundStyle(.blue)
                                     }
                                 }
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(.white)
-                                .cornerRadius(8)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    withAnimation(.spring) {
+                                        isDeletingListItem = true
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                        context.delete(item)
+                                        queue.count -= 1
+                                        try? context.save()
+                                        isDeletingListItem = false
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash") // Label with a trash icon and "Delete" text
+                                }
+                                .tint(.red) // Set the swipe action background to red
+                            }
+                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                Button {
+                                    withAnimation(.spring) {
+                                        isDeletingListItem = true
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                        context.delete(item)
+                                        queue.count -= 1
+                                        queue.completed += 1
+                                        try? context.save()
+                                        isDeletingListItem = false
+                                    }
+                                } label: {
+                                    Label("Done", systemImage: "checkmark.circle.fill")
+                                }
+                                .tint(.green)
+                            }
+                            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            .padding()
+                            .background(.white)
                         }
                     }
-                    .padding(.vertical)
+                    .opacity(isDeletingListItem ? 0 : 1)
+                    .scaleEffect(isDeletingListItem ? 0.75 : 1)
+                    .contentMargins(.vertical, 0)
+                    .contentMargins(.horizontal, 1)
+                    .listSectionSpacing(8)
+                    .padding(.top,8)
                 } else {
                     // Swipeable card for the first item
                     if let firstItem = items.first {
@@ -122,7 +183,7 @@ struct QueueItemsView: View {
                                             Image(systemName: "text.page.badge.magnifyingglass")
                                         }
                                         Button {
-                                            // do something
+                                            
                                         } label: {
                                             Text("Update")
                                             Image(systemName: "arrow.trianglehead.2.clockwise")
@@ -131,7 +192,7 @@ struct QueueItemsView: View {
                                             deleteFirstItem(firstItem: firstItem)
                                         } label: {
                                             Text("Delete")
-                                            Image(systemName: "minus.circle")
+                                            Image(systemName: "trash")
                                         }
                                     } label: {
                                         Image(systemName: "ellipsis")
@@ -195,28 +256,94 @@ struct QueueItemsView: View {
                         )
                         .zIndex(1) // Ensure this view is above others
                     }
-                    // for each for the remaining items
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
+                    if items.dropFirst().isEmpty {
+                        Rectangle()
+                            .foregroundStyle(Color(.systemGroupedBackground))
+                    } else {
+                        List {
                             ForEach(items.dropFirst()) { item in
-                                HStack {
-                                    Text(item.title)
-                                    Spacer()
-                                    Button {
-                                        
-                                    } label: {
-                                        Image(systemName: "ellipsis")
-                                            .foregroundStyle(.blue)
+                                Section {
+                                    HStack {
+                                        Text(item.title)
+                                        Spacer()
+                                        Menu {
+                                            Button {
+                                                
+                                            } label: {
+                                                Text("Details")
+                                                Image(systemName: "text.page.badge.magnifyingglass")
+                                            }
+                                            Button {
+                                                
+                                            } label: {
+                                                Text("Update")
+                                                Image(systemName: "arrow.trianglehead.2.clockwise")
+                                            }
+                                            Button {
+                                                withAnimation(.spring) {
+                                                    isDeletingListItem = true
+                                                }
+                                                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                                    context.delete(item)
+                                                    queue.count -= 1
+                                                    try? context.save()
+                                                    isDeletingListItem = false
+                                                }
+                                            } label: {
+                                                Text("Delete")
+                                                Image(systemName: "trash")
+                                            }
+                                        } label: {
+                                            Image(systemName: "ellipsis")
+                                                .foregroundStyle(.blue)
+                                        }
                                     }
                                 }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button {
+                                        withAnimation(.spring) {
+                                            isDeletingListItem = true
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                            context.delete(item)
+                                            queue.count -= 1
+                                            try? context.save()
+                                            isDeletingListItem = false
+                                        }
+                                    } label: {
+                                        Label("Delete", systemImage: "trash") // Label with a trash icon and "Delete" text
+                                    }
+                                    .tint(.red) // Set the swipe action background to red
+                                }
+                                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                    Button {
+                                        withAnimation(.spring) {
+                                            isDeletingListItem = true
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                            context.delete(item)
+                                            queue.count -= 1
+                                            queue.completed += 1
+                                            try? context.save()
+                                            isDeletingListItem = false
+                                        }
+                                    } label: {
+                                        Label("Done", systemImage: "checkmark.circle.fill")
+                                    }
+                                    .tint(.green)
+                                }
+                                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                                 .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(.white)
-                                .cornerRadius(8)
                             }
                         }
+                        .opacity(isDeletingListItem ? 0 : 1)
+                        .scaleEffect(isDeletingListItem ? 0.75 : 1)
+                        .contentMargins(.vertical, 0)
+                        .contentMargins(.horizontal, 1)
+                        .listSectionSpacing(8)
+                        .zIndex(0)
                     }
-                    .zIndex(0) // Ensure this view is behind the swipeable card
                 }
             }
         }
@@ -229,6 +356,7 @@ struct QueueItemsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // Delay removal until animation completes
             context.delete(firstItem)
             queue.count -= 1
+            try? context.save()
             isRemovingFirstItem = false // Reset state for subsequent actions
         }
     }
@@ -244,10 +372,12 @@ struct QueueItemsView: View {
             switch action {
             case .skip:
                 firstItem.createdOn = Date.now // Reschedule item
+                try? context.save()
             case .done:
                 queue.completed += 1
                 context.delete(firstItem) // Remove item
                 queue.count -= 1
+                try? context.save()
             }
         }
     }

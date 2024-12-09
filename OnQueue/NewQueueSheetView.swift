@@ -61,6 +61,7 @@ struct NewQueueSheetView: View {
                 Button("Create Queue") {
                     let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)
                     context.insert(newQueue)
+                    try? context.save()
                     dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)

@@ -1,41 +1,39 @@
 //
-//  NewItemSheetView.swift
+//  UpdateItemSheet.swift
 //  OnQueue
 //
-//  Created by Miguel Schlicht on 12/6/24.
+//  Created by Miguel Schlicht on 12/8/24.
 //
 
 import SwiftUI
 
-struct NewItemSheetView: View {
-    let queue: Queue
+struct UpdateItemSheetView: View {
+    let item: QueueItem
     @Environment(\.dismiss) private var dismiss
-    @State private var title: String = ""
+    @State private var title: String
     @FocusState private var isTitleFieldFocused: Bool
     @Environment(\.modelContext) private var context
-
+    
+    init(item: QueueItem) {
+        self.item = item
+        _title = State(initialValue: item.title) // Initialize the state variable with item.title
+    }
+    
     var body: some View {
         NavigationStack() {
             Form {
                 TextField("Item Title", text: $title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Button("Create Item") {
-                    let newQueueItem = QueueItem(title: title)
-                    if queue.items != nil {
-                        queue.items?.append(newQueueItem)
-                    } else {
-                        queue.items = [newQueueItem]
-                    }
-                    queue.count += 1
+                Button("Save Updates") {
+                    item.title = title
                     try? context.save()
-                    dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
                 .disabled(title.isEmpty)
-                .navigationTitle("New Item")
+                .navigationTitle("Update Item")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -48,7 +46,3 @@ struct NewItemSheetView: View {
         }
     }
 }
-
-//#Preview {
-//    NewItemSheetView()
-//}
