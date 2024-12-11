@@ -37,7 +37,6 @@ struct QueueItemsView: View {
                     }
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .padding()
-                    .background(.white)
                 }
                 .contentMargins(.vertical, 0)
                 .contentMargins(.horizontal, 1)
@@ -46,6 +45,11 @@ struct QueueItemsView: View {
             } else {
                 if let firstItem = items.first {
                     NextItemView(queue: queue, item: firstItem)
+//                    if items.count > 1 {
+//                        NextItemView(queue: queue, item: firstItem, time: items[1].createdOn)
+//                    } else {
+//                        NextItemView(queue: queue, item: firstItem, time: firstItem.createdOn)
+//                    }
                 }
                 if items.dropFirst().isEmpty {
                     Rectangle()
@@ -57,7 +61,6 @@ struct QueueItemsView: View {
                         }
                         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding()
-                        .background(.white)
                     }
                     .contentMargins(.vertical, 0)
                     .contentMargins(.horizontal, 1)

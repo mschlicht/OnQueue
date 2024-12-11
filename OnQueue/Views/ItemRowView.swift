@@ -16,43 +16,17 @@ struct ItemRowView: View {
     var provider = QueuesProvider.shared
     
     var body: some View {
+        
         Section {
-            HStack {
-                Text(item.title)
-                Spacer()
-                Menu {
-                    Button {
-                        
-                    } label: {
-                        Text("Details")
-                        Image(systemName: "text.page.badge.magnifyingglass")
-                    }
-                    Button {
-                        
-                    } label: {
-                        Text("Edit")
-                        Image(systemName: "pencil")
-                    }
-                    Button {
-                        withAnimation {
-                            do {
-                                try delete(item)
-                            } catch {
-                                print(error)
-                            }
-                        }
-                    } label: {
-                        Text("Delete")
-                        Image(systemName: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .foregroundStyle(.blue)
-                        .frame(width: 30, height: 20, alignment: .center)
+            NavigationLink(destination: ItemDetailsView(item: item)) {
+                HStack {
+                    Text(item.title)
+                    Spacer()
+                    
                 }
             }
         }
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 withAnimation {
                     do {
@@ -66,7 +40,7 @@ struct ItemRowView: View {
             }
             .tint(.red)
         }
-        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button {
                 queue.completed += 1
                 withAnimation {
@@ -97,3 +71,37 @@ struct ItemRowView: View {
 //        }
     }
 }
+
+
+// Ellipse Menu
+
+//Menu {
+//    Button {
+//        
+//    } label: {
+//        Text("Details")
+//        Image(systemName: "text.page.badge.magnifyingglass")
+//    }
+//    Button {
+//        
+//    } label: {
+//        Text("Edit")
+//        Image(systemName: "pencil")
+//    }
+//    Button {
+//        withAnimation {
+//            do {
+//                try delete(item)
+//            } catch {
+//                print(error)
+//            }
+//        }
+//    } label: {
+//        Text("Delete")
+//        Image(systemName: "trash")
+//    }
+//} label: {
+//    Image(systemName: "ellipsis")
+//        .foregroundStyle(.blue)
+//        .frame(width: 30, height: 20, alignment: .center)
+//}
