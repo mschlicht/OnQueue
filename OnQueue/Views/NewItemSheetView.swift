@@ -1,39 +1,37 @@
 //
-//  UpdateItemSheet.swift
+//  NewItemSheetView.swift
 //  OnQueue
 //
-//  Created by Miguel Schlicht on 12/8/24.
+//  Created by Miguel Schlicht on 12/6/24.
 //
 
 import SwiftUI
 
-struct UpdateItemSheetView: View {
-    let item: QueueItem
+struct NewItemSheetView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var title: String
     @FocusState private var isTitleFieldFocused: Bool
-    @Environment(\.modelContext) private var context
-    
-    init(item: QueueItem) {
-        self.item = item
-        _title = State(initialValue: item.title) // Initialize the state variable with item.title
-    }
-    
+    @ObservedObject var viewModel: EditItemViewModel
+
     var body: some View {
         NavigationStack() {
             Form {
-                TextField("Item Title", text: $title)
+                TextField("Item Title", text: $viewModel.item.title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Button("Save Updates") {
-                    item.title = title
-                    try? context.save()
+                Button("Create Item") {
+                    
+                    do {
+                        try viewModel.save()
+                    } catch {
+                        print(error)
+                    }
+                    dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
-                .disabled(title.isEmpty)
-                .navigationTitle("Update Item")
+                .disabled(viewModel.item.title.isEmpty)
+                .navigationTitle("New Item")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -46,3 +44,7 @@ struct UpdateItemSheetView: View {
         }
     }
 }
+
+//#Preview {
+//    NewItemSheetView()
+//}

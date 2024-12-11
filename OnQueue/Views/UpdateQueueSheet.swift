@@ -1,20 +1,29 @@
 //
-//  NewQueueSheetView.swift
+//  UpdateQueueSheetView.swift
 //  OnQueue
 //
-//  Created by Miguel Schlicht on 12/5/24.
+//  Created by Miguel Schlicht on 12/9/24.
 //
 
 import SwiftUI
 
-struct NewQueueSheetView: View {
-    @Environment(\.modelContext) private var context
+struct UpdateQueueSheetView: View {
+    let queue: Queue
+    
     @Environment(\.dismiss) private var dismiss
-    @State private var title: String = ""
-    @State private var selectedColor: String = "Blue"
-    @State private var selectedIcon: String = "square.stack.3d.up.fill"
-    @State private var selectedGroup: String = "Personal"
+    @State private var title: String
+    @State private var selectedColor: String
+    @State private var selectedIcon: String
+    @State private var selectedGroup: String
     @FocusState private var isTitleFieldFocused: Bool
+    
+    init(queue: Queue) {
+        self.queue = queue
+        _title = State(initialValue: queue.title)
+        _selectedColor = State(initialValue: queue.color)
+        _selectedIcon = State(initialValue: queue.icon)
+        _selectedGroup = State(initialValue: queue.group)
+    }
 
     let colors: [String] = ["Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Blue", "Indigo", "Purple", "Pink", "Brown"]
     let groups = ["Personal", "Family", "Roomates"]
@@ -58,17 +67,14 @@ struct NewQueueSheetView: View {
                         Text(group).tag(group)
                     }
                 }
-                Button("Create Queue") {
-                    let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)
-                    context.insert(newQueue)
-                    try? context.save()
+                Button("Save Changes") {
                     dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
                 .disabled(title.isEmpty)
-                .navigationTitle("New Queue")
+                .navigationTitle("Update Queue")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -83,5 +89,5 @@ struct NewQueueSheetView: View {
 }
 
 #Preview {
-    NewQueueSheetView()
+    UpdateQueueSheetView(queue: Queue.preview())
 }

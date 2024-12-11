@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
-import SwiftData
+//import SwiftData
 
 struct ContentView: View {
     @State private var searchText: String = ""
     @State private var isNewQueueSheetPresented: Bool = false
+    
+    var provider = QueuesProvider.shared
     
     var body: some View {
         NavigationStack {
@@ -19,6 +21,12 @@ struct ContentView: View {
             .navigationTitle("Queues")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Image("queue")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         
@@ -45,7 +53,7 @@ struct ContentView: View {
             }
             .background(Color(.systemGroupedBackground))
             .sheet(isPresented: $isNewQueueSheetPresented) {
-                NewQueueSheetView()
+                NewQueueSheetView(viewModel: .init(provider: provider))
                     .presentationDetents([.large])
             }
         }
@@ -53,7 +61,8 @@ struct ContentView: View {
 }
 
 struct QueuesAndGroups: View {
-    @Query(sort: \Queue.createdOn) private var queues: [Queue]
+    //@Query(sort: \Queue.createdOn) private var queues: [Queue]
+    @FetchRequest(fetchRequest: Queue.all()) private var queues
     @Environment(\.isSearching) private var isSearching
     
     var body: some View {
@@ -88,7 +97,7 @@ struct QueuesAndGroups: View {
                                 
                                 Text(queue.title)
                                     .foregroundStyle(.black)
-                                Text("\(queue.count)")
+                                Text("\(queue.countItems)")
                                     .font(.subheadline)
                                     .foregroundStyle(.gray)
                             }
@@ -123,5 +132,5 @@ struct QueuesAndGroups: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Queue.self, inMemory: true)
+        .environment(\.managedObjectContext, QueuesProvider.shared.viewContext)
 }

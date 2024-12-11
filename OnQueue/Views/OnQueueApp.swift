@@ -6,15 +6,16 @@
 //
 
 import SwiftUI
-import SwiftData
+//import SwiftData
 
 @main
 struct OnQueueApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.managedObjectContext, QueuesProvider.shared.viewContext)
         }
-        .modelContainer(for: Queue.self)
+//        .modelContainer(for: Queue.self)
     }
     
     init() {
