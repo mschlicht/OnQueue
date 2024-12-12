@@ -1,29 +1,16 @@
 //
-//  UpdateQueueSheetView.swift
+//  NewQueueSheetView.swift
 //  OnQueue
 //
-//  Created by Miguel Schlicht on 12/9/24.
+//  Created by Miguel Schlicht on 12/5/24.
 //
 
 import SwiftUI
 
-struct UpdateQueueSheetView: View {
-    let queue: Queue
-    
+struct EditQueueSheetView: View {
+    @ObservedObject var viewModel: EditQueueViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var title: String
-    @State private var selectedColor: String
-    @State private var selectedIcon: String
-    @State private var selectedGroup: String
     @FocusState private var isTitleFieldFocused: Bool
-    
-    init(queue: Queue) {
-        self.queue = queue
-        _title = State(initialValue: queue.title)
-        _selectedColor = State(initialValue: queue.color)
-        _selectedIcon = State(initialValue: queue.icon)
-        _selectedGroup = State(initialValue: queue.group)
-    }
 
     let colors: [String] = ["Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Blue", "Indigo", "Purple", "Pink", "Brown"]
     let groups = ["Personal", "Family", "Roomates"]
@@ -47,34 +34,42 @@ struct UpdateQueueSheetView: View {
     var body: some View {
         NavigationStack() {
             Form {
-                TextField("Queue Title", text: $title)
+                TextField("Queue Title", text: $viewModel.queue.title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Picker("Color", selection: $selectedColor) {
+                Picker("Color", selection: $viewModel.queue.color) {
                     ForEach(colors, id: \ .self) { color in
                         Text(color).tag(color)
                     }
                 }
-                .foregroundStyle(colorFromDescription(selectedColor))
-                Picker("Icon", selection: $selectedIcon) {
+                .foregroundStyle(colorFromDescription(viewModel.queue.color))
+                Picker("Icon", selection: $viewModel.queue.icon) {
                     ForEach(icons, id: \.systemImage) { icon in
                         Label(icon.name, systemImage: icon.systemImage)
                             .tag(icon.systemImage)
                     }
                 }
-                Picker("Group", selection: $selectedGroup) {
+                Picker("Group", selection: $viewModel.queue.group) {
                     ForEach(groups, id: \ .self) { group in
                         Text(group).tag(group)
                     }
                 }
-                Button("Save Changes") {
+                Button(viewModel.isNew ? "Create Queue" : "Update Queue") {
+//                    let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)
+//                    context.insert(newQueue)
+//                    try? context.save()
+                    do {
+                        try viewModel.save()
+                    } catch {
+                        print(error)
+                    }
                     dismiss()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
-                .disabled(title.isEmpty)
-                .navigationTitle("Update Queue")
+                .disabled(viewModel.queue.title.isEmpty)
+                .navigationTitle("New Queue")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -89,5 +84,5 @@ struct UpdateQueueSheetView: View {
 }
 
 #Preview {
-    UpdateQueueSheetView(queue: Queue.preview())
+    EditQueueSheetView(viewModel: .init(provider: .shared))
 }

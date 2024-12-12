@@ -67,7 +67,7 @@ struct QueueView: View {
                 .presentationDetents([.large])
         }
         .sheet(isPresented: $isUpdateQueueSheetPresented) {
-            UpdateQueueSheetView(queue: queue)
+            EditQueueSheetView(viewModel: .init(provider: provider, queue:queue))
                 .presentationDetents([.large])
         }
     }

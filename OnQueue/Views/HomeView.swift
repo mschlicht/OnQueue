@@ -8,7 +8,7 @@
 import SwiftUI
 //import SwiftData
 
-struct ContentView: View {
+struct HomeView: View {
     @State private var searchText: String = ""
     @State private var isNewQueueSheetPresented: Bool = false
     
@@ -53,7 +53,7 @@ struct ContentView: View {
             }
             .background(Color(.systemGroupedBackground))
             .sheet(isPresented: $isNewQueueSheetPresented) {
-                NewQueueSheetView(viewModel: .init(provider: provider))
+                EditQueueSheetView(viewModel: .init(provider: provider))
                     .presentationDetents([.large])
             }
         }
@@ -131,6 +131,6 @@ struct QueuesAndGroups: View {
 }
 
 #Preview {
-    ContentView()
+    HomeView()
         .environment(\.managedObjectContext, QueuesProvider.shared.viewContext)
 }

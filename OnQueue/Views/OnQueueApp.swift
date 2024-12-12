@@ -12,7 +12,7 @@ import SwiftUI
 struct OnQueueApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
                 .environment(\.managedObjectContext, QueuesProvider.shared.viewContext)
         }
 //        .modelContainer(for: Queue.self)
