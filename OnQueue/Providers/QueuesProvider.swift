@@ -13,7 +13,7 @@ final class QueuesProvider {
     // Only one instance
     static let shared = QueuesProvider()
     
-    private let persistentContainer: NSPersistentContainer
+    private let persistentContainer: NSPersistentCloudKitContainer
     
     var viewContext: NSManagedObjectContext {
         persistentContainer.viewContext
@@ -25,11 +25,24 @@ final class QueuesProvider {
     
     private init(){
         
-        persistentContainer = NSPersistentContainer(name: "QueuesDataModel")
+        persistentContainer = NSPersistentCloudKitContainer(name: "QueuesDataModel")
+        
+        guard let description = persistentContainer.persistentStoreDescriptions.first else {
+            fatalError("Failed to initialize persistent container")
+        }
+        
+        let cloudKitOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.onqueue.OnQueue")
+        description.cloudKitContainerOptions = cloudKitOptions
+        
         if EnvironmentValues.isPreview {
             persistentContainer.persistentStoreDescriptions.first?.url = .init(filePath: "/dev/null")
         }
+        
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        
+        persistentContainer.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
+        
         persistentContainer.loadPersistentStores {_, error in
             if let error {
                 fatalError("Unable to load store with error: \(error)")

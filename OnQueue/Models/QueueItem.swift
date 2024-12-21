@@ -12,7 +12,7 @@ final class QueueItem: NSManagedObject, Identifiable {
     @NSManaged var title: String
     @NSManaged var createdOn: Date
     
-    @NSManaged var queue: Queue
+    @NSManaged var queue: Queue?
     
     // Defaults on Create
     override func awakeFromInsert() {

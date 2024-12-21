@@ -16,7 +16,7 @@ final class Queue: NSManagedObject, Identifiable {
     @NSManaged var completed: Int
     @NSManaged var createdOn: Date
     
-    @NSManaged var items:NSSet
+    @NSManaged var items:NSSet?
     
     // Defaults on Create
     override func awakeFromInsert() {

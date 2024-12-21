@@ -17,7 +17,7 @@ final class EditItemViewModel: ObservableObject {
     init(provider: QueuesProvider, item: QueueItem? = nil, queue: Queue) {
         self.context = provider.newContext
         self.item = QueueItem(context: self.context)
-        self.item.queue = context.object(with: queue.objectID) as! Queue
+        self.item.queue = context.object(with: queue.objectID) as? Queue
     }
     
     func save() throws {
