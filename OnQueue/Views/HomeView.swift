@@ -73,7 +73,7 @@ struct QueuesAndGroups: View {
                         Image("queue")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 48, height: 50)
+                            .frame(width: 70)
                         Text("Create a queue.")
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -81,7 +81,7 @@ struct QueuesAndGroups: View {
                     .padding(.vertical, 196)
                 }
             } else {
-                LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible())], spacing: 20) {
+                LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible())], spacing: 32) {
                     ForEach(queues) { queue in
                         NavigationLink(destination: QueueView(queue: queue)) {
                             VStack {
@@ -104,7 +104,7 @@ struct QueuesAndGroups: View {
                         }
                     }
                 }
-                .padding([.vertical])
+                .padding(.vertical, 32)
             }
 //            if !isSearching {
 //                VStack() {

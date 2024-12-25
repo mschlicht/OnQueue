@@ -9,17 +9,56 @@ import SwiftUI
 
 struct QueueDetailsView: View {
     let queue: Queue
+    @FetchRequest private var items: FetchedResults<QueueItem>
+        
+    init(queue: Queue) {
+        self.queue = queue
+        self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItemsDone(for: queue))
+    }
     
     var body: some View {
-        List {
-            HStack {
-                Text("Completed")
-                Spacer()
-                Text("\(queue.completed)")
+        VStack {
+            if items.isEmpty {
+                ContentUnavailableView {
+                    VStack {
+                        Image(systemName: queue.icon)
+                            .font(.system(size: 48))
+                            .foregroundStyle(colorFromDescription(queue.color))
+                        Text("No completed items.")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                    }
+                }
+            } else {
+                List {
+                    ForEach(items) { item in
+                        Section {
+                            NavigationLink(destination: ItemDetailsView(item: item, queue: queue)) {
+                                HStack {
+                                    Text(item.title)
+                                    Spacer()
+                                    
+                                }
+                            }
+                        }
+                    }
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding()
+                }
+                .contentMargins(.vertical, 0)
+                .contentMargins(.horizontal, 1)
+                .listSectionSpacing(8)
+                .padding(.top,8)
+                .padding([.horizontal])
             }
-            
         }
-        .navigationTitle("Details")
+        .navigationTitle("Completed")
+        .toolbar {
+            ToolbarItemGroup(placement: .bottomBar) {
+                Text("Total Completed: \(queue.completed)")
+            }
+        }
+        .background(Color(.systemGroupedBackground))
     }
 }
 

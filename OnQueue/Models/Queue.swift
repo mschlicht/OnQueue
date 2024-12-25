@@ -14,6 +14,7 @@ final class Queue: NSManagedObject, Identifiable {
     @NSManaged var icon: String
     @NSManaged var completed: Int
     @NSManaged var createdOn: Date
+    @NSManaged var onlyAdd: Bool
     
     @NSManaged var items:NSSet?
     
@@ -26,6 +27,7 @@ final class Queue: NSManagedObject, Identifiable {
         setPrimitiveValue(Date.now, forKey: "createdOn")
         setPrimitiveValue(0, forKey: "completed")
         setPrimitiveValue([], forKey: "items")
+        setPrimitiveValue(false, forKey: "onlyAdd")
     }
 }
 
@@ -33,7 +35,7 @@ extension Queue {
     
     var countItems: Int {
         let itemsSet = items as? Set<QueueItem> ?? []
-        return itemsSet.count
+        return itemsSet.filter { !$0.done }.count
     }
     
     var sortedItems: [QueueItem] {
@@ -48,7 +50,7 @@ extension Queue {
     static func all() -> NSFetchRequest<Queue> {
         let request: NSFetchRequest<Queue> = queueFetchRequest
         request.sortDescriptors = [
-            NSSortDescriptor(keyPath: \Queue.createdOn, ascending: true)
+            NSSortDescriptor(keyPath: \Queue.createdOn, ascending: false)
         ]
         return request
     }

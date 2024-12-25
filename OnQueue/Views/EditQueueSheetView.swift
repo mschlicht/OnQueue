@@ -11,8 +11,10 @@ struct EditQueueSheetView: View {
     @ObservedObject var viewModel: EditQueueViewModel
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isTitleFieldFocused: Bool
+    
+    var provider = QueuesProvider.shared
 
-    let colors: [String] = ["Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Blue", "Indigo", "Purple", "Pink", "Brown"]
+    let colors: [String] = ["Blue", "Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Indigo", "Purple", "Pink", "Brown"]
     let groups = ["Personal", "Family", "Roomates"]
     let icons: [(name: String, systemImage: String)] = [
         ("Default", "square.stack.3d.up.fill"),
@@ -48,6 +50,16 @@ struct EditQueueSheetView: View {
                         Label(icon.name, systemImage: icon.systemImage)
                             .tag(icon.systemImage)
                     }
+                }
+                if (provider.isShared(object: viewModel.queue) && provider.isOwner(object: viewModel.queue)){
+                    Toggle(isOn: $viewModel.queue.onlyAdd) {
+                        Label {
+                            Text("Participants can only add")
+                        } icon: {
+                            
+                        }
+                    }
+                    .tint(.blue)
                 }
                 Button(viewModel.isNew ? "Create Queue" : "Update Queue") {
 //                    let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)

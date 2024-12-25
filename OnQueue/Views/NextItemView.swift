@@ -17,7 +17,7 @@ struct NextItemView: View {
     var provider = QueuesProvider.shared
     
     var body: some View {
-        NavigationLink(destination: ItemDetailsView(item: item)) {
+        NavigationLink(destination: ItemDetailsView(item: item, queue: queue)) {
             ZStack {
                 Color.white
                     .cornerRadius(16)
@@ -32,7 +32,7 @@ struct NextItemView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        if (provider.canEdit(object: queue)) {
+                        if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                             Button {
                                 withAnimation {
                                     do {
@@ -50,7 +50,7 @@ struct NextItemView: View {
                     }
                     Spacer()
                     HStack {
-                        if (provider.canEdit(object: queue)) {
+                        if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                             Button {
                                 performSwipeAction(.skip, item: item)
                             } label: {
@@ -71,7 +71,7 @@ struct NextItemView: View {
                         //                        .foregroundStyle(.blue)
                         //                    }
                         //                    Spacer()
-                        if (provider.canEdit(object: queue)) {
+                        if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                             Button {
                                 performSwipeAction(.done, item: item)
                             } label: {
@@ -89,7 +89,7 @@ struct NextItemView: View {
             .offset(x: dragOffset.width, y: dragOffset.height)
             .rotationEffect(.degrees(Double(dragOffset.width / 10)))
             .gesture(
-                provider.canEdit(object: queue) ?
+                provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue) ?
                     DragGesture()
                         .onChanged { gesture in
                             dragOffset = CGSize(
@@ -157,8 +157,9 @@ struct NextItemView: View {
                 }
             case .done:
                 queue.completed += 1
+                item.done = true
+                item.completedOn = Date.now
                 do {
-                    try delete(item)
                     if moc.hasChanges {
                         try moc.save()
                     }

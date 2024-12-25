@@ -14,7 +14,7 @@ struct QueueItemsView: View {
         
     init(queue: Queue) {
         self.queue = queue
-        self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItems(for: queue))
+        self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItemsPending(for: queue))
     }
 
     var body: some View {

@@ -12,7 +12,7 @@ import SwiftUI
 import UIKit
 
 struct QueueView: View {
-    let queue: Queue
+    @ObservedObject var queue: Queue
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var isNewItemSheetPresented: Bool = false
@@ -31,10 +31,6 @@ struct QueueView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    NavigationLink(destination: QueueDetailsView(queue: queue), label: {
-                        Text("Details")
-                        Image(systemName: "text.page.badge.magnifyingglass")
-                    })
                     Button {
                         if provider.isShared(object: queue) {
                             showShareController = true
@@ -48,7 +44,11 @@ struct QueueView: View {
                         Text("Share")
                         Image(systemName: "square.and.arrow.up")
                     }
-                    if (provider.canEdit(object: queue)) {
+                    NavigationLink(destination: QueueDetailsView(queue: queue), label: {
+                        Text("Completed")
+                        Image(systemName: "text.page.badge.magnifyingglass")
+                    })
+                    if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                         Button {
                             isUpdateQueueSheetPresented = true
                         } label: {
@@ -56,7 +56,7 @@ struct QueueView: View {
                             Image(systemName: "pencil")
                         }
                     }
-                    if (provider.canEdit(object: queue) && provider.isOwner(object: queue)) {
+                    if (provider.isOwner(object: queue)) {
                         Button {
                             withAnimation {
                                 do {
@@ -96,7 +96,7 @@ struct QueueView: View {
         }
         .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $isNewItemSheetPresented) {
-            NewItemSheetView(viewModel: .init(provider: provider, queue: queue))
+            EditItemSheetView(viewModel: .init(provider: provider, queue: queue))
                 .presentationDetents([.large])
         }
         .sheet(isPresented: $isUpdateQueueSheetPresented) {

@@ -7,10 +7,11 @@
 
 import SwiftUI
 
-struct NewItemSheetView: View {
+struct EditItemSheetView: View {
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isTitleFieldFocused: Bool
     @ObservedObject var viewModel: EditItemViewModel
+    @Environment(\.managedObjectContext) private var moc
 
     var body: some View {
         NavigationStack() {
@@ -18,7 +19,9 @@ struct NewItemSheetView: View {
                 TextField("Item Title", text: $viewModel.item.title)
                     .focused($isTitleFieldFocused)
                     .onAppear{isTitleFieldFocused = true}
-                Button("Create Item") {
+                TextField("Item Description", text: $viewModel.item.itemDesc, axis: .vertical)
+                    .lineLimit(6)
+                Button(viewModel.isNew ? "Create Item" : "Update Item") {
                     
                     do {
                         try viewModel.save()
@@ -31,7 +34,7 @@ struct NewItemSheetView: View {
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
                 .disabled(viewModel.item.title.isEmpty)
-                .navigationTitle("New Item")
+                .navigationTitle(viewModel.isNew ? "New Item" : "Edit Item")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {

@@ -5,11 +5,15 @@
         <attribute name="completed" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="createdOn" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="icon" optional="YES" attributeType="String"/>
+        <attribute name="onlyAdd" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="QueueItem" inverseName="queue" inverseEntity="QueueItem"/>
     </entity>
     <entity name="QueueItem" representedClassName=".QueueItem" syncable="YES">
+        <attribute name="completedOn" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="createdOn" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="done" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="itemDesc" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="queue" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Queue" inverseName="items" inverseEntity="Queue"/>
     </entity>

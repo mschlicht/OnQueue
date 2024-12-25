@@ -18,7 +18,7 @@ struct ItemRowView: View {
     var body: some View {
         
         Section {
-            NavigationLink(destination: ItemDetailsView(item: item)) {
+            NavigationLink(destination: ItemDetailsView(item: item, queue: queue)) {
                 HStack {
                     Text(item.title)
                     Spacer()
@@ -26,7 +26,7 @@ struct ItemRowView: View {
                 }
             }
         }
-        .if(provider.canEdit(object: queue)) { view in
+        .if(provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) { view in
             view
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button {
@@ -44,10 +44,11 @@ struct ItemRowView: View {
             }
             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                 Button {
-                    queue.completed += 1
                     withAnimation {
+                        queue.completed += 1
+                        item.done = true
+                        item.completedOn = Date.now
                         do {
-                            try delete(item)
                             if moc.hasChanges {
                                 try moc.save()
                             }
