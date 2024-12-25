@@ -48,19 +48,6 @@ class CloudSharingCoordinator:NSObject,UICloudSharingControllerDelegate{
 
     func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController){
 
-        guard let queue = queue else {return}
-        if !stack.isOwner(object: queue) {
-            do {
-                try delete(queue)
-            } catch {
-                print(error)
-            }
-        }
-        else {
-            // 应该处理掉ckshare,目前不起作用。已提交feedback，希望官方提供正式的恢复方式。
-            // 目前我的处理思路是，先对停止共享的托管对象（例如note）在本地进行Deep Copy（包含所有关系数据）
-            // 然后调用purgeObjectsAndRecordsInZone删除网络上的共享自定义Zone
-        }
     }
     static let shared = CloudSharingCoordinator()
     let stack = QueuesProvider.shared

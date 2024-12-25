@@ -49,11 +49,6 @@ struct EditQueueSheetView: View {
                             .tag(icon.systemImage)
                     }
                 }
-                Picker("Group", selection: $viewModel.queue.group) {
-                    ForEach(groups, id: \ .self) { group in
-                        Text(group).tag(group)
-                    }
-                }
                 Button(viewModel.isNew ? "Create Queue" : "Update Queue") {
 //                    let newQueue = Queue(title: title,color: selectedColor.description, icon: selectedIcon, group: selectedGroup)
 //                    context.insert(newQueue)
@@ -69,7 +64,7 @@ struct EditQueueSheetView: View {
                 .buttonStyle(.borderedProminent)
                 .padding(.vertical)
                 .disabled(viewModel.queue.title.isEmpty)
-                .navigationTitle("New Queue")
+                .navigationTitle(viewModel.isNew ? "New Queue" : "Edit Queue")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {

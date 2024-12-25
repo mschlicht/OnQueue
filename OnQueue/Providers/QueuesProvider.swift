@@ -141,7 +141,7 @@ extension QueuesProvider {
     }
 
     func isOwner(object: NSManagedObject) -> Bool {
-        guard isShared(object: object) else { return false }
+        guard isShared(object: object) else { return true }
         guard let share = try? persistentContainer.fetchShares(matching: [object.objectID])[object.objectID] else {
             print("Get ckshare error")
             return false

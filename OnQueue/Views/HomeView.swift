@@ -36,12 +36,12 @@ struct HomeView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
-                    Button {
-                        
-                    }label: {
-                        Image(systemName: "person.2.badge.plus.fill")
-                            .foregroundStyle(.blue)
-                    }
+//                    Button {
+//                        
+//                    }label: {
+//                        Image(systemName: "person.2.badge.plus.fill")
+//                            .foregroundStyle(.blue)
+//                    }
                     Spacer()
                     Button {
                         isNewQueueSheetPresented = true
@@ -78,7 +78,7 @@ struct QueuesAndGroups: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                     }
-                    .padding(.vertical, 48)
+                    .padding(.vertical, 196)
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible())], spacing: 20) {
@@ -106,26 +106,26 @@ struct QueuesAndGroups: View {
                 }
                 .padding([.vertical])
             }
-            if !isSearching {
-                VStack() {
-                    Text("Shared Groups")
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack() {
-                        Button(action: {}) {
-                            HStack {
-                                Image(systemName: "plus")
-                                    .padding([.horizontal],6)
-                                Text("New Group")
-                            }
-                            .padding([.vertical, .horizontal], 10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.white)
-                            .cornerRadius(8)
-                        }
-                    }
-                }
-            }
+//            if !isSearching {
+//                VStack() {
+//                    Text("Shared Queues")
+//                        .foregroundStyle(.secondary)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                    VStack() {
+//                        Button(action: {}) {
+//                            HStack {
+//                                Image(systemName: "plus")
+//                                    .padding([.horizontal],6)
+//                                Text("New Group")
+//                            }
+//                            .padding([.vertical, .horizontal], 10)
+//                            .frame(maxWidth: .infinity, alignment: .leading)
+//                            .background(.white)
+//                            .cornerRadius(8)
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 }

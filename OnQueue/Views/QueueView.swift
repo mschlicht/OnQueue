@@ -35,27 +35,6 @@ struct QueueView: View {
                         Text("Details")
                         Image(systemName: "text.page.badge.magnifyingglass")
                     })
-                    if (provider.canEdit(object: queue)) {
-                        Button {
-                            isUpdateQueueSheetPresented = true
-                        } label: {
-                            Text("Edit")
-                            Image(systemName: "pencil")
-                        }
-                    }
-                    Button {
-                        withAnimation {
-                            do {
-                                try delete(queue)
-                                dismiss()
-                            } catch {
-                                print(error)
-                            }
-                        }
-                    } label: {
-                        Text("Delete")
-                        Image(systemName: "trash")
-                    }
                     Button {
                         if provider.isShared(object: queue) {
                             showShareController = true
@@ -69,24 +48,49 @@ struct QueueView: View {
                         Text("Share")
                         Image(systemName: "square.and.arrow.up")
                     }
+                    if (provider.canEdit(object: queue)) {
+                        Button {
+                            isUpdateQueueSheetPresented = true
+                        } label: {
+                            Text("Edit")
+                            Image(systemName: "pencil")
+                        }
+                    }
+                    if (provider.canEdit(object: queue) && provider.isOwner(object: queue)) {
+                        Button {
+                            withAnimation {
+                                do {
+                                    try delete(queue)
+                                    dismiss()
+                                } catch {
+                                    print(error)
+                                }
+                            }
+                        } label: {
+                            Text("Delete")
+                            Image(systemName: "trash")
+                        }
+                    }
                 } label: {
                     Image(systemName: "line.3.horizontal")
                         .foregroundStyle(.blue)
                 }
             }
             ToolbarItemGroup(placement: .bottomBar) {
-                Button {
-
-                } label: {
-                    Image(systemName: "chart.bar.fill")
-                        .foregroundStyle(.blue)
-                }
+//                Button {
+//
+//                } label: {
+//                    Image(systemName: "chart.bar.fill")
+//                        .foregroundStyle(.blue)
+//                }
                 Spacer()
-                Button {
-                    isNewItemSheetPresented = true
-                } label: {
-                    Image(systemName: "plus.square.fill")
-                        .foregroundStyle(.blue)
+                if (provider.canEdit(object: queue)) {
+                    Button {
+                        isNewItemSheetPresented = true
+                    } label: {
+                        Image(systemName: "plus.square.fill")
+                            .foregroundStyle(.blue)
+                    }
                 }
             }
         }
@@ -103,7 +107,6 @@ struct QueueView: View {
             let share = provider.getShare(queue)!
             CloudSharingView(share: share, container: provider.ckContainer, queue: queue)
                 .ignoresSafeArea()
-                .presentationDetents([.medium, .large])
         }
     }
     private func delete(_ queue: Queue) throws {

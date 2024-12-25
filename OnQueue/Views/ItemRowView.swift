@@ -26,37 +26,40 @@ struct ItemRowView: View {
                 }
             }
         }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button {
-                withAnimation {
-                    do {
-                        try delete(item)
-                    } catch {
-                        print(error)
-                    }
-                }
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            .tint(.red)
-        }
-        .swipeActions(edge: .leading, allowsFullSwipe: true) {
-            Button {
-                queue.completed += 1
-                withAnimation {
-                    do {
-                        try delete(item)
-                        if moc.hasChanges {
-                            try moc.save()
+        .if(provider.canEdit(object: queue)) { view in
+            view
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button {
+                    withAnimation {
+                        do {
+                            try delete(item)
+                        } catch {
+                            print(error)
                         }
-                    } catch {
-                        print(error)
                     }
+                } label: {
+                    Label("Delete", systemImage: "trash")
                 }
-            } label: {
-                Label("Done", systemImage: "checkmark.circle.fill")
+                .tint(.red)
             }
-            .tint(.green)
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button {
+                    queue.completed += 1
+                    withAnimation {
+                        do {
+                            try delete(item)
+                            if moc.hasChanges {
+                                try moc.save()
+                            }
+                        } catch {
+                            print(error)
+                        }
+                    }
+                } label: {
+                    Label("Done", systemImage: "checkmark.circle.fill")
+                }
+                .tint(.green)
+            }
         }
     }
     private func delete(_ item: QueueItem) throws {
@@ -69,6 +72,20 @@ struct ItemRowView: View {
 //                try context.save()
 //            }
 //        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func `if`<Content: View>(
+        _ condition: Bool,
+        apply: (Self) -> Content
+    ) -> some View {
+        if condition {
+            apply(self)
+        } else {
+            self
+        }
     }
 }
 

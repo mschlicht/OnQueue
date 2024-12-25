@@ -32,31 +32,34 @@ struct NextItemView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Button {
-                            withAnimation {
-                                do {
-                                    try delete(item)
-                                } catch {
-                                    print(error)
+                        if (provider.canEdit(object: queue)) {
+                            Button {
+                                withAnimation {
+                                    do {
+                                        try delete(item)
+                                    } catch {
+                                        print(error)
+                                    }
                                 }
+                            } label: {
+                                Image(systemName: "trash")
                             }
-                        } label: {
-                            Image(systemName: "trash")
+                            .padding()
+                            .foregroundStyle(.red)
                         }
-                        .padding()
-                        .foregroundStyle(.red)
-                        //Spacer()
                     }
                     Spacer()
                     HStack {
-                        Button {
-                            performSwipeAction(.skip, item: item)
-                        } label: {
-                            HStack {
-                                Image(systemName: "arrow.left")
-                                Text("Skip")
+                        if (provider.canEdit(object: queue)) {
+                            Button {
+                                performSwipeAction(.skip, item: item)
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.left")
+                                    Text("Skip")
+                                }
+                                .foregroundStyle(.yellow)
                             }
-                            .foregroundStyle(.yellow)
                         }
                         Spacer()
                         //                    Button {
@@ -68,14 +71,16 @@ struct NextItemView: View {
                         //                        .foregroundStyle(.blue)
                         //                    }
                         //                    Spacer()
-                        Button {
-                            performSwipeAction(.done, item: item)
-                        } label: {
-                            HStack {
-                                Text("Done")
-                                Image(systemName: "arrow.right")
+                        if (provider.canEdit(object: queue)) {
+                            Button {
+                                performSwipeAction(.done, item: item)
+                            } label: {
+                                HStack {
+                                    Text("Done")
+                                    Image(systemName: "arrow.right")
+                                }
+                                .foregroundStyle(.green)
                             }
-                            .foregroundStyle(.green)
                         }
                     }
                     .padding()
@@ -84,27 +89,30 @@ struct NextItemView: View {
             .offset(x: dragOffset.width, y: dragOffset.height)
             .rotationEffect(.degrees(Double(dragOffset.width / 10)))
             .gesture(
-                DragGesture()
-                    .onChanged { gesture in
-                        dragOffset = CGSize(
-                            width: gesture.translation.width,
-                            height: max(min(gesture.translation.height, 50), -50)
-                        )
-                    }
-                    .onEnded { _ in
-                        if dragOffset.width > 150 {
-                            performSwipeAction(.done, item: item)
-                        } else if dragOffset.width < -150 {
-                            performSwipeAction(.skip, item: item)
-                        } else {
-                            withAnimation(.spring()) {
-                                dragOffset = .zero // Reset position if not swiped far enough
-                            }
+                provider.canEdit(object: queue) ?
+                    DragGesture()
+                        .onChanged { gesture in
+                            dragOffset = CGSize(
+                                width: gesture.translation.width,
+                                height: max(min(gesture.translation.height, 50), -50)
+                            )
                         }
-                    }
+                        .onEnded { _ in
+                            if dragOffset.width > 150 {
+                                performSwipeAction(.done, item: item)
+                            } else if dragOffset.width < -150 {
+                                performSwipeAction(.skip, item: item)
+                            } else {
+                                withAnimation(.spring()) {
+                                    dragOffset = .zero // Reset position if not swiped far enough
+                                }
+                            }
+                        } : nil
             )
+            
         }
         .zIndex(1)
+        .buttonStyle(PlainButtonStyle())
     }
     private func delete(_ item: QueueItem) throws {
         let context = provider.viewContext
