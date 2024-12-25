@@ -10,6 +10,7 @@ import SwiftUI
 
 @main
 struct OnQueueApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
         WindowGroup {
             HomeView()

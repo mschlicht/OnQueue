@@ -5,8 +5,11 @@
 //  Created by Miguel Schlicht on 12/5/24.
 //
 
-import SwiftUI
+import CloudKit
 import CoreData
+import Foundation
+import SwiftUI
+import UIKit
 
 struct QueueView: View {
     let queue: Queue
@@ -14,6 +17,8 @@ struct QueueView: View {
     @State private var searchText = ""
     @State private var isNewItemSheetPresented: Bool = false
     @State private var isUpdateQueueSheetPresented: Bool = false
+    @State private var showShareController = false
+    @State var sharing = false
     
     var provider = QueuesProvider.shared
     @Environment(\.managedObjectContext) private var moc
@@ -30,11 +35,13 @@ struct QueueView: View {
                         Text("Details")
                         Image(systemName: "text.page.badge.magnifyingglass")
                     })
-                    Button {
-                        isUpdateQueueSheetPresented = true
-                    } label: {
-                        Text("Edit")
-                        Image(systemName: "pencil")
+                    if (provider.canEdit(object: queue)) {
+                        Button {
+                            isUpdateQueueSheetPresented = true
+                        } label: {
+                            Text("Edit")
+                            Image(systemName: "pencil")
+                        }
                     }
                     Button {
                         withAnimation {
@@ -48,6 +55,19 @@ struct QueueView: View {
                     } label: {
                         Text("Delete")
                         Image(systemName: "trash")
+                    }
+                    Button {
+                        if provider.isShared(object: queue) {
+                            showShareController = true
+                        } else {
+//                            openSharingController(queue: queue)
+                            Task.detached {
+                                await createShare(queue)
+                            }
+                        }
+                    } label: {
+                        Text("Share")
+                        Image(systemName: "square.and.arrow.up")
                     }
                 } label: {
                     Image(systemName: "line.3.horizontal")
@@ -79,6 +99,12 @@ struct QueueView: View {
             EditQueueSheetView(viewModel: .init(provider: provider, queue:queue))
                 .presentationDetents([.large])
         }
+        .sheet(isPresented: $showShareController) {
+            let share = provider.getShare(queue)!
+            CloudSharingView(share: share, container: provider.ckContainer, queue: queue)
+                .ignoresSafeArea()
+                .presentationDetents([.medium, .large])
+        }
     }
     private func delete(_ queue: Queue) throws {
         let context = provider.viewContext
@@ -86,5 +112,42 @@ struct QueueView: View {
         context.delete(existingQueue)
         try context.save()
     }
+    
+    func createShare(_ queue: Queue) async {
+        sharing = true
+        do {
+            let (_, share, _) = try await provider.persistentContainer.share([queue], to: nil)
+            share[CKShare.SystemFieldKey.title] = queue.title
+        } catch {
+            print("Faile to create share")
+            sharing = false
+        }
+        sharing = false
+        showShareController = true
+    }
+    
+//    private func openSharingController(queue: Queue) {
+//        let keyWindow = UIApplication.shared.connectedScenes
+//            .filter { $0.activationState == .foregroundActive }
+//            .map { $0 as? UIWindowScene }
+//            .compactMap { $0 }
+//            .first?.windows
+//            .filter { $0.isKeyWindow }.first
+//
+//        let sharingController = UICloudSharingController {
+//            (_, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) in
+//
+//            provider.persistentContainer.share([queue], to: nil) { _, share, container, error in
+//                if let actualShare = share {
+//                    queue.managedObjectContext?.performAndWait {
+//                        actualShare[CKShare.SystemFieldKey.title] = queue.title
+//                    }
+//                }
+//                completion(share, container, error)
+//            }
+//        }
+//
+//        keyWindow?.rootViewController?.present(sharingController, animated: true)
+//    }
 }
 
