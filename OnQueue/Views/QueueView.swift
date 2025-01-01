@@ -17,6 +17,7 @@ struct QueueView: View {
     @State private var searchText = ""
     @State private var isNewItemSheetPresented: Bool = false
     @State private var isUpdateQueueSheetPresented: Bool = false
+    @State private var isUpdatePermissionsSheetPresented: Bool = false
     @State private var showShareController = false
     @State var sharing = false
     
@@ -24,7 +25,7 @@ struct QueueView: View {
     @Environment(\.managedObjectContext) private var moc
 
     var body: some View {
-        QueueItemsView(queue:queue)
+        QueueItemsView(queue:queue, searchText: searchText)
         .padding([.horizontal])
         .navigationTitle(queue.title)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
@@ -77,12 +78,14 @@ struct QueueView: View {
                 }
             }
             ToolbarItemGroup(placement: .bottomBar) {
-//                Button {
-//
-//                } label: {
-//                    Image(systemName: "chart.bar.fill")
-//                        .foregroundStyle(.blue)
-//                }
+                if (provider.isShared(object: queue) && provider.isOwner(object: queue)){
+                    Button {
+                        isUpdatePermissionsSheetPresented = true
+                    } label: {
+                        Image(systemName: "person.2.badge.gearshape")
+                            .foregroundStyle(.blue)
+                    }
+                }
                 Spacer()
                 if (provider.canEdit(object: queue)) {
                     Button {
@@ -101,6 +104,10 @@ struct QueueView: View {
         }
         .sheet(isPresented: $isUpdateQueueSheetPresented) {
             EditQueueSheetView(viewModel: .init(provider: provider, queue:queue))
+                .presentationDetents([.large])
+        }
+        .sheet(isPresented: $isUpdatePermissionsSheetPresented) {
+            EditPermissionsView(viewModel: .init(provider: provider, queue:queue))
                 .presentationDetents([.large])
         }
         .sheet(isPresented: $showShareController) {

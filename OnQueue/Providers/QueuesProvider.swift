@@ -9,12 +9,26 @@ import CloudKit
 import CoreData
 import Foundation
 
-final class QueuesProvider {
+/**
+ This app doesn't necessarily post notifications from the main queue.
+ */
+extension Notification.Name {
+    static let cdcksStoreDidChange = Notification.Name("cdcksStoreDidChange")
+}
+
+struct UserInfoKey {
+    static let storeUUID = "storeUUID"
+    static let transactions = "transactions"
+}
+
+struct TransactionAuthor {
+    static let app = "app"
+}
+
+final class QueuesProvider: NSObject, ObservableObject {
     // Only one instance
     static let shared = QueuesProvider()
-    
-    init(){}
-    
+        
     lazy var persistentContainer: NSPersistentCloudKitContainer = {
         let baseURL = NSPersistentContainer.defaultDirectoryURL()
         let storeFolderURL = baseURL.appendingPathComponent("CoreDataStores")
@@ -78,6 +92,13 @@ final class QueuesProvider {
         } catch {
             fatalError("Fail to pin viewContext to the current generation:\(error)")
         }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(storeRemoteChange(_:)),
+                                               name: .NSPersistentStoreRemoteChange,
+                                               object: container.persistentStoreCoordinator)
+        NotificationCenter.default.addObserver(self, selector: #selector(containerEventChanged(_:)),
+                                               name: NSPersistentCloudKitContainer.eventChangedNotification,
+                                               object: container)
 
         return container
     }()
@@ -105,6 +126,15 @@ final class QueuesProvider {
     var newContext: NSManagedObjectContext {
         persistentContainer.newBackgroundContext()
     }
+    
+    /**
+     An operation queue for handling history-processing tasks: watching changes, deduplicating tags, and triggering UI updates, if needed.
+     */
+    lazy var historyQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
 }
 
 extension QueuesProvider {

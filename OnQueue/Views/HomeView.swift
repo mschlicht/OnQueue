@@ -16,7 +16,7 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            QueuesAndGroups()
+            QueuesAndGroups(searchText: searchText)
             .padding([.horizontal])
             .navigationTitle("Queues")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
@@ -27,14 +27,14 @@ struct HomeView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 30)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        
-                    }label: {
-                        Image(systemName: "gear")
-                            .foregroundStyle(.blue)
-                    }
-                }
+//                ToolbarItem(placement: .topBarTrailing) {
+//                    Button {
+//                        
+//                    }label: {
+//                        Image(systemName: "gear")
+//                            .foregroundStyle(.blue)
+//                    }
+//                }
                 ToolbarItemGroup(placement: .bottomBar) {
 //                    Button {
 //                        
@@ -64,9 +64,11 @@ struct QueuesAndGroups: View {
     //@Query(sort: \Queue.createdOn) private var queues: [Queue]
     @FetchRequest(fetchRequest: Queue.all()) private var queues
     @Environment(\.isSearching) private var isSearching
+    var searchText: String
     
     var body: some View {
         ScrollView {
+            let filteredQueues = queues.filter { queue in searchText.isEmpty || queue.title.localizedCaseInsensitiveContains(searchText)}
             if queues.isEmpty {
                 ContentUnavailableView {
                     VStack {
@@ -82,7 +84,7 @@ struct QueuesAndGroups: View {
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible())], spacing: 32) {
-                    ForEach(queues) { queue in
+                    ForEach(filteredQueues) { queue in
                         NavigationLink(destination: QueueView(queue: queue)) {
                             VStack {
                                 ZStack {
@@ -97,6 +99,8 @@ struct QueuesAndGroups: View {
                                 
                                 Text(queue.title)
                                     .foregroundStyle(.black)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
                                 Text("\(queue.countItems)")
                                     .font(.subheadline)
                                     .foregroundStyle(.gray)

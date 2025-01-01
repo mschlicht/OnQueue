@@ -45,6 +45,7 @@ struct EditItemSheetView: View {
                 }
             }
         }
+//        .onReceive(NotificationCenter.default.storeDidChangePublisher){_ in }
     }
 }
 

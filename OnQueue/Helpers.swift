@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 extension UIApplication {
     func endEditing() {
@@ -28,5 +29,11 @@ func colorFromDescription(_ description: String) -> Color {
     case "pink": return .pink
     case "brown": return .brown
     default: return .gray // Default fallback color
+    }
+}
+
+extension NotificationCenter {
+    var storeDidChangePublisher: Publishers.ReceiveOn<NotificationCenter.Publisher, DispatchQueue> {
+        return publisher(for: .cdcksStoreDidChange).receive(on: DispatchQueue.main)
     }
 }
