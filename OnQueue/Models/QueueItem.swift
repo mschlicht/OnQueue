@@ -32,10 +32,14 @@ extension QueueItem {
         NSFetchRequest(entityName: "QueueItem")
     }
     
-    static func sortedQueueItemsPending(for queue:Queue) -> NSFetchRequest<QueueItem> {
+    static func sortedQueueItemsPending(for queue:Queue, searchText:String="") -> NSFetchRequest<QueueItem> {
         let request: NSFetchRequest<QueueItem> = itemFetchRequest
         // Set a predicate to filter by the provided queue
-        request.predicate = NSPredicate(format: "queue == %@ AND done == %@", queue, NSNumber(value: false))
+        if !searchText.isEmpty {
+            request.predicate = NSPredicate(format: "queue == %@ AND done == %@ AND title CONTAINS[cd] %@", queue, NSNumber(value: false), searchText)
+        } else {
+            request.predicate = NSPredicate(format: "queue == %@ AND done == %@", queue, NSNumber(value: false))
+        }
         
         // Sort items by creation date
         request.sortDescriptors = [

@@ -16,11 +16,10 @@ struct QueueItemsView: View {
     init(queue: Queue, searchText: String) {
         self.queue = queue
         self.searchText = searchText
-        self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItemsPending(for: queue))
+        self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItemsPending(for: queue, searchText: searchText))
     }
 
     var body: some View {
-        let filteredItems = items.filter { item in searchText.isEmpty || item.title.localizedCaseInsensitiveContains(searchText)}
         if items.isEmpty {
             ContentUnavailableView {
                 VStack {
@@ -35,7 +34,7 @@ struct QueueItemsView: View {
         } else {
             if isSearching {
                 List {
-                    ForEach(filteredItems) { item in
+                    ForEach(items) { item in
                         ItemRowView(queue:queue,item: item)
                     }
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))

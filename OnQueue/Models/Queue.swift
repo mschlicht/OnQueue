@@ -47,11 +47,16 @@ extension Queue {
         NSFetchRequest(entityName: "Queue")
     }
     
-    static func all() -> NSFetchRequest<Queue> {
+    static func all(searchText: String = "") -> NSFetchRequest<Queue> {
         let request: NSFetchRequest<Queue> = queueFetchRequest
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \Queue.createdOn, ascending: false)
         ]
+        
+        if !searchText.isEmpty {
+            request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchText)
+        }
+        
         return request
     }
     

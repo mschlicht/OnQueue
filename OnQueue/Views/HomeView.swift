@@ -62,13 +62,18 @@ struct HomeView: View {
 
 struct QueuesAndGroups: View {
     //@Query(sort: \Queue.createdOn) private var queues: [Queue]
-    @FetchRequest(fetchRequest: Queue.all()) private var queues
+    @FetchRequest var queues: FetchedResults<Queue>
     @Environment(\.isSearching) private var isSearching
     var searchText: String
+
+    init(searchText: String) {
+        _queues = FetchRequest(fetchRequest: Queue.all(searchText: searchText))
+        self.searchText = searchText
+    }
+    
     
     var body: some View {
         ScrollView {
-            let filteredQueues = queues.filter { queue in searchText.isEmpty || queue.title.localizedCaseInsensitiveContains(searchText)}
             if queues.isEmpty {
                 ContentUnavailableView {
                     VStack {
@@ -84,7 +89,7 @@ struct QueuesAndGroups: View {
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible())], spacing: 32) {
-                    ForEach(filteredQueues) { queue in
+                    ForEach(queues) { queue in
                         NavigationLink(destination: QueueView(queue: queue)) {
                             VStack {
                                 ZStack {
