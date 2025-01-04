@@ -12,6 +12,8 @@ struct ItemRowView: View {
     let queue: Queue
     let item: QueueItem
     @Environment(\.managedObjectContext) private var moc
+    @Binding var isRatingSheetPresented: Bool
+    @Binding var currentItem: QueueItem?
     
     var provider = QueuesProvider.shared
     
@@ -55,6 +57,8 @@ struct ItemRowView: View {
                         } catch {
                             print(error)
                         }
+                        currentItem = item
+                        isRatingSheetPresented = true
                     }
                 } label: {
                     Label("Done", systemImage: "checkmark.circle.fill")
@@ -89,37 +93,3 @@ extension View {
         }
     }
 }
-
-
-// Ellipse Menu
-
-//Menu {
-//    Button {
-//        
-//    } label: {
-//        Text("Details")
-//        Image(systemName: "text.page.badge.magnifyingglass")
-//    }
-//    Button {
-//        
-//    } label: {
-//        Text("Edit")
-//        Image(systemName: "pencil")
-//    }
-//    Button {
-//        withAnimation {
-//            do {
-//                try delete(item)
-//            } catch {
-//                print(error)
-//            }
-//        }
-//    } label: {
-//        Text("Delete")
-//        Image(systemName: "trash")
-//    }
-//} label: {
-//    Image(systemName: "ellipsis")
-//        .foregroundStyle(.blue)
-//        .frame(width: 30, height: 20, alignment: .center)
-//}

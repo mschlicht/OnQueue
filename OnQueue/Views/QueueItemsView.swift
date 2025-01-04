@@ -11,12 +11,16 @@ struct QueueItemsView: View {
     @ObservedObject var queue: Queue
     @Environment(\.isSearching) private var isSearching
     @FetchRequest private var items: FetchedResults<QueueItem>
+    @Binding var isRatingSheetPresented: Bool
+    @Binding var currentItem: QueueItem?
     var searchText: String
         
-    init(queue: Queue, searchText: String) {
+    init(queue: Queue, searchText: String, isRatingSheetPresented: Binding<Bool>, currentItem: Binding<QueueItem?>) {
         self.queue = queue
         self.searchText = searchText
+        self._currentItem = currentItem
         self._items = FetchRequest(fetchRequest: QueueItem.sortedQueueItemsPending(for: queue, searchText: searchText))
+        self._isRatingSheetPresented = isRatingSheetPresented
     }
 
     var body: some View {
@@ -35,7 +39,7 @@ struct QueueItemsView: View {
             if isSearching {
                 List {
                     ForEach(items) { item in
-                        ItemRowView(queue:queue,item: item)
+                        ItemRowView(queue:queue,item: item,isRatingSheetPresented:$isRatingSheetPresented, currentItem: $currentItem)
                     }
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .padding()
@@ -46,7 +50,7 @@ struct QueueItemsView: View {
                 .padding(.top,8)
             } else {
                 if let firstItem = items.first {
-                    NextItemView(queue: queue, item: firstItem)
+                    NextItemView(queue: queue, item: firstItem, isRatingSheetPresented: $isRatingSheetPresented, currentItem: $currentItem)
 //                    if items.count > 1 {
 //                        NextItemView(queue: queue, item: firstItem, time: items[1].createdOn)
 //                    } else {
@@ -59,7 +63,7 @@ struct QueueItemsView: View {
                 } else {
                     List {
                         ForEach(items.dropFirst()) { item in
-                            ItemRowView(queue:queue,item: item)
+                            ItemRowView(queue:queue,item: item,isRatingSheetPresented:$isRatingSheetPresented, currentItem: $currentItem)
                         }
                         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding()

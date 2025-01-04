@@ -73,6 +73,27 @@ struct ItemDetailsView: View {
                         }
                     }
                 }
+                if (item.done && (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue))) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        Button {
+                            withAnimation {
+                                do {
+                                    queue.completed -= 1
+                                    item.done = false
+                                    if moc.hasChanges {
+                                        try moc.save()
+                                    }
+                                } catch {
+                                    print(error)
+                                }
+                                dismiss()
+                            }
+                        }label: {
+                            Text("Return to Queue")
+                                .foregroundStyle(.blue)
+                        }
+                    }
+                }
             }
         }
         .sheet(isPresented: $isEditItemSheetPresented) {

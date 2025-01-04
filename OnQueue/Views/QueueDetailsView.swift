@@ -37,7 +37,13 @@ struct QueueDetailsView: View {
                                 HStack {
                                     Text(item.title)
                                     Spacer()
-                                    
+                                    if(item.rating != 0) {
+                                        Text(String(item.rating))
+                                        Image(systemName:"star.fill")
+                                            .resizable()
+                                            .frame(width: 18, height: 18)
+                                            .foregroundColor(.yellow)
+                                    }
                                 }
                             }
                         }

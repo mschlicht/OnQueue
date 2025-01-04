@@ -15,7 +15,6 @@ struct EditQueueSheetView: View {
 //    var provider = QueuesProvider.shared
 
     let colors: [String] = ["Blue", "Red", "Orange", "Yellow", "Green", "Mint", "Teal", "Cyan", "Indigo", "Purple", "Pink", "Brown"]
-    let groups = ["Personal", "Family", "Roomates"]
     let icons: [(name: String, systemImage: String)] = [
         ("Default", "square.stack.3d.up.fill"),
         ("Popcorn", "popcorn.fill"),
@@ -29,7 +28,8 @@ struct EditQueueSheetView: View {
         ("Walk", "figure.walk"),
         ("Run", "figure.run"),
         ("Social Activity", "figure.socialdance"),
-        ("Food", "fork.knife")
+        ("Food", "fork.knife"),
+        ("Music", "music.note")
     ]
 
 

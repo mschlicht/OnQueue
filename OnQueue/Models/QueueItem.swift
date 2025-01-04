@@ -14,6 +14,7 @@ final class QueueItem: NSManagedObject, Identifiable {
     @NSManaged var itemDesc: String
     @NSManaged var done: Bool
     @NSManaged var completedOn: Date
+    @NSManaged var rating: Int
     
     @NSManaged var queue: Queue?
     

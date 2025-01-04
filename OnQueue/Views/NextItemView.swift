@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct NextItemView: View {
-    let queue: Queue
+    var queue: Queue
     @ObservedObject var item: QueueItem
     //let time: Date
     @Environment(\.managedObjectContext) private var moc
     @State private var dragOffset: CGSize = .zero
+    @Binding var isRatingSheetPresented: Bool
+    @Binding var currentItem: QueueItem?
     
     var provider = QueuesProvider.shared
     
@@ -166,41 +168,9 @@ struct NextItemView: View {
                 } catch {
                     print(error)
                 }
+                currentItem = item
+                isRatingSheetPresented = true
             }
         }
     }
 }
-
-
-// Ellipse Menu
-
-//Menu {
-//    Button {
-//
-//    } label: {
-//        Text("Details")
-//        Image(systemName: "text.page.badge.magnifyingglass")
-//    }
-//    Button {
-//        
-//    } label: {
-//        Text("Edit")
-//        Image(systemName: "pencil")
-//    }
-//    Button {
-//        withAnimation {
-//            do {
-//                try delete(item)
-//            } catch {
-//                print(error)
-//            }
-//        }
-//    } label: {
-//        Text("Delete")
-//        Image(systemName: "trash")
-//    }
-//} label: {
-//    Image(systemName: "ellipsis")
-//        .foregroundStyle(.blue)
-//        .padding()
-//}

@@ -19,13 +19,15 @@ struct QueueView: View {
     @State private var isUpdateQueueSheetPresented: Bool = false
     @State private var isUpdatePermissionsSheetPresented: Bool = false
     @State private var showShareController = false
+    @State private var isRatingSheetPresented = false
+    @State private var currentItem: QueueItem? = nil
     @State var sharing = false
     
     var provider = QueuesProvider.shared
     @Environment(\.managedObjectContext) private var moc
 
     var body: some View {
-        QueueItemsView(queue:queue, searchText: searchText)
+        QueueItemsView(queue:queue, searchText: searchText, isRatingSheetPresented: $isRatingSheetPresented, currentItem: $currentItem)
         .padding([.horizontal])
         .navigationTitle(queue.title)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
@@ -115,6 +117,11 @@ struct QueueView: View {
             CloudSharingView(share: share, container: provider.ckContainer, queue: queue)
                 .ignoresSafeArea()
         }
+        .sheet(isPresented: $isRatingSheetPresented) {
+            RatingSheetView(queue:queue,item:currentItem!)
+                .presentationDetents([.height(200)])
+        }
+        .alert
     }
     private func delete(_ queue: Queue) throws {
         let context = provider.viewContext
