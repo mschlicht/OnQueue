@@ -9,10 +9,11 @@ import SwiftUI
 import CoreData
 
 struct ItemRowView: View {
-    let queue: Queue
-    let item: QueueItem
+    var queue: Queue
+    @ObservedObject var item: QueueItem
     @Environment(\.managedObjectContext) private var moc
     @Binding var isRatingSheetPresented: Bool
+    @Binding var isDeleteItemAlertPresented: Bool
     @Binding var currentItem: QueueItem?
     
     var provider = QueuesProvider.shared
@@ -32,13 +33,8 @@ struct ItemRowView: View {
             view
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button {
-                    withAnimation {
-                        do {
-                            try delete(item)
-                        } catch {
-                            print(error)
-                        }
-                    }
+                    currentItem = item
+                    isDeleteItemAlertPresented = true
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }

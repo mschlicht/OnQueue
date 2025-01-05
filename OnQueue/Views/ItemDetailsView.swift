@@ -9,22 +9,36 @@
 import SwiftUI
 
 struct ItemDetailsView: View {
-    @ObservedObject var item: QueueItem
-    let queue: Queue
+    @StateObject var item: QueueItem
+    var queue: Queue
     @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var moc
     @State private var isEditItemSheetPresented: Bool = false
+    @State private var isRatingSheetPresented = false
+    @State private var isDeleteAlertPresented = false
     
     var provider = QueuesProvider.shared
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(item.title)
+                .font(.title)
+                .fontWeight(.bold)
+            if item.done {
+                HStack(spacing: 10) {
+                    ForEach(0..<5, id: \.self) { index in
+                        Image(systemName: index < item.rating ? "star.fill" : "star")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(index < item.rating ? .yellow : .gray)
+                    }
+                }
+            }
             Text(item.itemDesc)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }
         .padding()
-        .navigationTitle(item.title)
         .toolbar {
             if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -37,17 +51,7 @@ struct ItemDetailsView: View {
                 if (!item.done && (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue))) {
                     ToolbarItemGroup(placement: .bottomBar) {
                         Button {
-                            withAnimation {
-                                do {
-                                    try delete(item)
-                                    if moc.hasChanges {
-                                        try moc.save()
-                                    }
-                                } catch {
-                                    print(error)
-                                }
-                                dismiss()
-                            }
+                            isDeleteAlertPresented = true
                         }label: {
                             Text("Delete")
                                 .foregroundStyle(.red)
@@ -65,7 +69,7 @@ struct ItemDetailsView: View {
                                 } catch {
                                     print(error)
                                 }
-                                dismiss()
+                                isRatingSheetPresented = true
                             }
                         }label: {
                             Text("Done")
@@ -75,6 +79,13 @@ struct ItemDetailsView: View {
                 }
                 if (item.done && (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue))) {
                     ToolbarItemGroup(placement: .bottomBar) {
+                        Button {
+                            isDeleteAlertPresented = true
+                        }label: {
+                            Text("Delete")
+                                .foregroundStyle(.red)
+                        }
+                        Spacer()
                         Button {
                             withAnimation {
                                 do {
@@ -89,7 +100,7 @@ struct ItemDetailsView: View {
                                 dismiss()
                             }
                         }label: {
-                            Text("Return to Queue")
+                            Text("Put Back on Queue")
                                 .foregroundStyle(.blue)
                         }
                     }
@@ -99,6 +110,28 @@ struct ItemDetailsView: View {
         .sheet(isPresented: $isEditItemSheetPresented) {
             EditItemSheetView(viewModel: .init(provider: provider,item:item, queue: queue))
                 .presentationDetents([.large])
+        }
+        .sheet(isPresented: $isRatingSheetPresented) {
+            RatingSheetView(queue:queue,item:item)
+                .presentationDetents([.height(200)])
+        }
+        .alert("Are you sure you want to delete \(item.title)?", isPresented: $isDeleteAlertPresented) {
+            Button("Delete", role: .destructive) {
+                withAnimation {
+                    do {
+                        try delete(item)
+                        if moc.hasChanges {
+                            try moc.save()
+                        }
+                    } catch {
+                        print(error)
+                    }
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Deleting an item will remove it completely.")
         }
         .background(Color(.systemGroupedBackground))
     }

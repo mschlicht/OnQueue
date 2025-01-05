@@ -36,16 +36,18 @@ struct RatingSheetView: View {
                 }
                 HStack(spacing: 32) {
                     Button {
-                        queue.completed -= 1
-                        item.done = false
-                        do {
-                            if moc.hasChanges {
-                                try moc.save()
+                        withAnimation {
+                            queue.completed -= 1
+                            item.done = false
+                            do {
+                                if moc.hasChanges {
+                                    try moc.save()
+                                }
+                            } catch {
+                                print(error)
                             }
-                        } catch {
-                            print(error)
+                            dismiss()
                         }
-                        dismiss()
                     } label: {
                         HStack {
                             Image(systemName: "arrow.uturn.backward")
@@ -54,15 +56,17 @@ struct RatingSheetView: View {
                         .foregroundStyle(.red)
                     }
                     Button {
-                        item.rating = selectedRating
-                        do {
-                            if moc.hasChanges {
-                                try moc.save()
+                        withAnimation {
+                            item.rating = selectedRating
+                            do {
+                                if moc.hasChanges {
+                                    try moc.save()
+                                }
+                            } catch {
+                                print(error)
                             }
-                        } catch {
-                            print(error)
+                            dismiss()
                         }
-                        dismiss()
                     } label: {
                         HStack {
                             Text("Done")

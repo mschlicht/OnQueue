@@ -103,9 +103,9 @@ struct QueuesAndGroups: View {
                                 }
                                 
                                 Text(queue.title)
-                                    .foregroundStyle(.black)
                                     .lineLimit(1)
                                     .truncationMode(.tail)
+                                    .foregroundStyle(Color.primary)
                                 Text("\(queue.countItems)")
                                     .font(.subheadline)
                                     .foregroundStyle(.gray)

@@ -20,14 +20,18 @@ struct QueueView: View {
     @State private var isUpdatePermissionsSheetPresented: Bool = false
     @State private var showShareController = false
     @State private var isRatingSheetPresented = false
+    @State private var isDeleteQueueAlertPresented = false
+    @State private var isDeleteItemAlertPresented = false
+    @State private var isSkipItemAlertPresented = false
     @State private var currentItem: QueueItem? = nil
+    @State private var oldCreatedOn: Date = Date.now
     @State var sharing = false
     
     var provider = QueuesProvider.shared
     @Environment(\.managedObjectContext) private var moc
 
     var body: some View {
-        QueueItemsView(queue:queue, searchText: searchText, isRatingSheetPresented: $isRatingSheetPresented, currentItem: $currentItem)
+        QueueItemsView(queue:queue, searchText: searchText, isRatingSheetPresented: $isRatingSheetPresented, isDeleteItemAlertPresented: $isDeleteItemAlertPresented, isSkipItemAlertPresented: $isSkipItemAlertPresented, currentItem: $currentItem, oldCreatedOn: $oldCreatedOn)
         .padding([.horizontal])
         .navigationTitle(queue.title)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
@@ -61,14 +65,7 @@ struct QueueView: View {
                     }
                     if (provider.isOwner(object: queue)) {
                         Button {
-                            withAnimation {
-                                do {
-                                    try delete(queue)
-                                    dismiss()
-                                } catch {
-                                    print(error)
-                                }
-                            }
+                            isDeleteQueueAlertPresented = true
                         } label: {
                             Text("Delete")
                             Image(systemName: "trash")
@@ -121,13 +118,70 @@ struct QueueView: View {
             RatingSheetView(queue:queue,item:currentItem!)
                 .presentationDetents([.height(200)])
         }
-        .alert
+        .alert("Are you sure you want to delete \(queue.title)?", isPresented: $isDeleteQueueAlertPresented) {
+            Button("Delete", role: .destructive) {
+                withAnimation {
+                    do {
+                        try delete(queue)
+                        dismiss()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Deleting a queue will remove it and all of its items completely.")
+        }
+        .alert("Are you sure you want to delete \(currentItem?.title ?? "this item")?", isPresented: $isDeleteItemAlertPresented) {
+            Button("Delete", role: .destructive) {
+                withAnimation {
+                    do {
+                        try delete(currentItem!)
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Deleting an item will remove it completely.")
+        }
+        .alert("Are you sure you want to skip \(currentItem?.title ?? "this item")?", isPresented: $isSkipItemAlertPresented) {
+            Button("Yes") {}
+            Button("Cancel", role: .cancel) {
+                withAnimation {
+                    currentItem?.createdOn = oldCreatedOn
+                    do {
+                        if moc.hasChanges {
+                            try moc.save()
+                        }
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        } message: {
+            Text("Skipping an item will move it to the back of the queue.")
+        }
     }
     private func delete(_ queue: Queue) throws {
         let context = provider.viewContext
         let existingQueue = try context.existingObject(with: queue.objectID)
         context.delete(existingQueue)
         try context.save()
+    }
+    
+    private func delete(_ item: QueueItem) throws {
+        let context = provider.viewContext
+        let existingItem = try context.existingObject(with: item.objectID)
+        context.delete(existingItem)
+        try context.save()
+//        Task(priority: .background) {
+//            try await context.perform {
+//                try context.save()
+//            }
+//        }
     }
     
     func createShare(_ queue: Queue) async {

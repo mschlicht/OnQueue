@@ -14,35 +14,36 @@ struct NextItemView: View {
     @Environment(\.managedObjectContext) private var moc
     @State private var dragOffset: CGSize = .zero
     @Binding var isRatingSheetPresented: Bool
+    @Binding var isDeleteItemAlertPresented: Bool
+    @Binding var isSkipItemAlertPresented: Bool
     @Binding var currentItem: QueueItem?
+    @Binding var oldCreatedOn: Date
     
     var provider = QueuesProvider.shared
+    
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationLink(destination: ItemDetailsView(item: item, queue: queue)) {
             ZStack {
-                Color.white
+                (colorScheme == .dark ? Color(.systemGray6) : .white)
                     .cornerRadius(16)
-                    .shadow(color: Color(.systemGray4), radius: 5)
+                    .shadow(color: colorScheme == .light ? Color(.systemGray4) : .clear, radius: colorScheme == .light ? 5 : 0)
                 
                 Text(item.title)
                     .font(.title)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.primary)
                     .fontWeight(.bold)
                     .padding()
+                    .multilineTextAlignment(.center)
                 
                 VStack {
                     HStack {
                         Spacer()
                         if (provider.canEdit(object: queue) && !queue.onlyAdd || provider.isOwner(object: queue)) {
                             Button {
-                                withAnimation {
-                                    do {
-                                        try delete(item)
-                                    } catch {
-                                        print(error)
-                                    }
-                                }
+                                currentItem = item
+                                isDeleteItemAlertPresented = true
                             } label: {
                                 Image(systemName: "trash")
                             }
@@ -116,17 +117,6 @@ struct NextItemView: View {
         .zIndex(1)
         .buttonStyle(PlainButtonStyle())
     }
-    private func delete(_ item: QueueItem) throws {
-        let context = provider.viewContext
-        let existingItem = try context.existingObject(with: item.objectID)
-        context.delete(existingItem)
-        try context.save()
-//        Task(priority: .background) {
-//            try await context.perform {
-//                try context.save()
-//            }
-//        }
-    }
 //    private func hold(_ item: QueueItem, time: Date) {
 //        let newTime = time.addingTimeInterval(0.1)
 //        item.createdOn = newTime
@@ -149,6 +139,7 @@ struct NextItemView: View {
             dragOffset = .zero
             switch action {
             case .skip:
+                oldCreatedOn = item.createdOn
                 item.createdOn = Date.now
                 do {
                     if moc.hasChanges {
@@ -157,6 +148,8 @@ struct NextItemView: View {
                 } catch {
                     print(error)
                 }
+                currentItem = item
+                isSkipItemAlertPresented = true
             case .done:
                 queue.completed += 1
                 item.done = true
